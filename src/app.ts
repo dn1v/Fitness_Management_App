@@ -3,21 +3,24 @@ import dotenv from 'dotenv'
 import { Database } from './db/mongoose'
 import { AthleteRouter } from './routes/athlete'
 import { SessionRPERouter } from './routes/sRPE'
+import { POMSRouter } from './routes/POMS'
 
 
 export class App {
     app: Express
-    port: string | undefined | number
+    port: string | undefined
     athleteRouter: AthleteRouter
     sessionRPERouter: SessionRPERouter
+    POMSRouter: POMSRouter
+    
     constructor() {
         this.app = express()
         this.athleteRouter = new AthleteRouter()
         this.sessionRPERouter = new SessionRPERouter()
+        this.POMSRouter = new POMSRouter()
         this.enviromentVariables()
         this.port = process.env.PORT
         this.init()
-
     }
 
     init(): void {
@@ -54,6 +57,7 @@ export class App {
     routes(): void {
         this.app.use(this.athleteRouter.registerRoutes())
             .use(this.sessionRPERouter.registerRoutes())
+            .use(this.POMSRouter.registerRoutes())
     }
 }
 

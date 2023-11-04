@@ -7,5 +7,8 @@ export enum Endpoints {
     USERS_LOGOUT = '/users/logout',
     USERS_LOGOUTALL = '/users/logoutall',
     SESSIONRPE = '/sessionRPE',
-    SESSIONRPE_ID = 'sessionRPE/:id'
+    SESSIONRPE_ID = 'sessionRPE/:id',
+    POMS = '/poms',
+    POMS_ID = '/poms/:id'
 }
+

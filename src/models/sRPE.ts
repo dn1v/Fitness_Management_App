@@ -3,7 +3,7 @@ import { ISessionRPE } from "../interfaces/sRPE.interface";
 
 const sRPESchema: Schema<ISessionRPE> = new Schema({
     owner: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true
     },
     trainingType: {
