@@ -3,10 +3,26 @@ import { Athlete } from "../models/athlete";
 import { Request, Response } from "express";
 import sharp from "sharp";
 import { SessionRPE } from "../models/sRPE";
+import { POMS } from "../models/POMS";
 
 export class AthleteController {
 
-    private readonly allowedUpdates: string[] = ['firstName', 'lastName', 'password', 'height', 'weight', 'age']
+    private readonly allowedUpdates: string[]
+
+    constructor() {
+        this.allowedUpdates = ['firstName', 'lastName', 'password', 'height', 'weight', 'age']
+        this.createAthlete = this.createAthlete.bind(this)
+        this.loginAthlete = this.loginAthlete.bind(this)
+        this.readAthlete = this.readAthlete.bind(this)
+        this.updateAthlete = this.updateAthlete.bind(this)
+        this.deleteAthlete = this.deleteAthlete.bind(this)
+        this.uploadPhoto = this.uploadPhoto.bind(this)
+        this.updateCheck = this.updateCheck.bind(this)
+        this.getPhoto = this.getPhoto.bind(this)
+        this.deletePhoto = this.deletePhoto.bind(this)
+        this.logoutAthlete = this.logoutAthlete.bind(this)
+        this.logoutAll = this.logoutAll.bind(this)
+    }
 
     public async createAthlete(req: Request, res: Response): Promise<void> {
         const athlete = new Athlete(req.body)
@@ -74,13 +90,15 @@ export class AthleteController {
     }
 
     public async deleteAthlete(req: Request, res: Response): Promise<void> {
+        console.log(req.athlete)
         try {
             // 'remove' as a first argument in pre method on the schema instance depricated
             await SessionRPE.deleteMany({ owner: req.athlete._id })
-            await req.athlete.remove()
-            res.send({ ahlete: req.athlete })
+            await POMS.deleteMany({ owner: req.athlete._id })
+            const athlete = await Athlete.deleteOne({ _id: req.athlete._id })
+            res.send({ deleted: athlete })
         } catch (e) {
-            res.status(500).send()
+            res.status(500).send(e)
         }
     }
 

@@ -3,7 +3,6 @@ import { SessionRPE } from "../models/sRPE";
 
 export class SessionRPEController {
 
-    //private readonly allowedUpdates = ['trainingType', 'duration', 'sRPE']
     private allowedUpdates: string[]
 
     constructor() {

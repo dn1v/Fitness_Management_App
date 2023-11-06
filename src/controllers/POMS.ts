@@ -3,15 +3,24 @@ import { Request, Response } from "express";
 
 export class POMSController {
 
-    private forbiddenUpdates = [
-        'angerMoodState',
-        'confusionMoodState',
-        'depressionMoodState',
-        'fatigueMoodState',
-        'tensionMoodState',
-        'vigourMoodState',
-        'totalMoodScore'
-    ]
+    private forbiddenUpdates: string[]
+
+    constructor() {
+        this.forbiddenUpdates = [
+            'angerMoodState',
+            'confusionMoodState',
+            'depressionMoodState',
+            'fatigueMoodState',
+            'tensionMoodState',
+            'vigourMoodState',
+            'totalMoodScore'
+        ]
+        this.createPOMS = this.createPOMS.bind(this)
+        this.readManyPOMS = this.readManyPOMS.bind(this)
+        this.readPOMS = this.readPOMS.bind(this)
+        this.updatePOMS = this.updatePOMS.bind(this)
+        this.deletePOMS = this.deletePOMS.bind(this)
+    }
 
     public async createPOMS(req: Request, res: Response): Promise<void> {
         const poms = new POMS({
