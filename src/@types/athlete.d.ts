@@ -1,3 +1,5 @@
+// user.d.ts ??
+
 import { Document, Model } from 'mongoose';
 
 declare module 'mongoose' {
@@ -5,3 +7,4 @@ declare module 'mongoose' {
     credentialsCheck(email: string, password: string): Promise<IAthlete | null>;
   }
 }
+

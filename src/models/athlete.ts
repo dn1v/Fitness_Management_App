@@ -106,6 +106,13 @@ athleteSchema.virtual('sRPE', {
     foreignField: 'owner'
 })
 
+
+athleteSchema.virtual('pomsQ', {
+    ref: 'POMS', 
+    localField: '_id', 
+    foreignField: 'owner'
+})
+
 export const Athlete = mongoose.model('Athlete', athleteSchema)
 
 

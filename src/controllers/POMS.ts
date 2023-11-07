@@ -40,7 +40,7 @@ export class POMSController {
         try {
             await req.athlete.populate({
                 path: "pomsQ",
-                match: req.options,
+                match: req.match,
                 options: req.options
             })
             res.send({ POMS: req.athlete.pomsQ })
@@ -51,7 +51,7 @@ export class POMSController {
 
     public async readPOMS(req: Request, res: Response): Promise<Response | void> {
         try {
-            const poms = await POMS.findOne({ _id: req.params._id, owner: req.athlete._id })
+            const poms = await POMS.findOne({ _id: req.params.id, owner: req.athlete._id })
             if (!poms) return res.sendStatus(404)
             res.send(poms)
         } catch (e) {
@@ -63,7 +63,7 @@ export class POMSController {
         const updates = Object.keys(req.body)
         if (this.isNotAllowed(updates)) return res.sendStatus(400)
         try {
-            const poms = await POMS.findOne({ _id: req.body._id, owner: req.athlete._id })
+            const poms = await POMS.findOne({ _id: req.params.id, owner: req.athlete._id })
             if (!poms) return res.sendStatus(404)
             updates.forEach((update: string) => poms[update] = req.body[update])
             await poms.save()
