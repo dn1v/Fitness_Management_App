@@ -2,7 +2,7 @@ import jsonwebtoken from 'jsonwebtoken'
 import { Athlete } from '../models/athlete'
 import { Request, Response, NextFunction } from 'express'
 import { Secret } from 'jsonwebtoken'
-import { DecodedToken } from '../interfaces/decodedToken'
+import { DecodedToken } from '../interfaces/decodedToken.interface'
 
 export class Auth {
 

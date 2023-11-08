@@ -3,7 +3,7 @@ import validator from "validator";
 import jsonwebtoken from 'jsonwebtoken'
 import * as bcrypt from 'bcryptjs'
 import { IUser } from "../interfaces/user.interface";
-
+import { Role } from "../@types/user";
 
 const userSchema: Schema<IUser> = new Schema({
     firstName: {
@@ -35,13 +35,8 @@ const userSchema: Schema<IUser> = new Schema({
     },
     role: {
         type: String,
+        enum: ['athlete', 'coach'],
         required: true,
-        default: 'athlete',
-        validate(value: string) {
-            if (value !== 'athlete') {
-                throw new Error("Role property must be 'athlete'.")
-            }
-        }
     }, 
     tokens: [
         {

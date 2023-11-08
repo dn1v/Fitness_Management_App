@@ -6,6 +6,10 @@ const coachSchema: Schema<ICoach> = new Schema({
     position: {
         type: String,
         required: true
+    },
+    role: {
+        type: String,
+        
     }
 })
 
