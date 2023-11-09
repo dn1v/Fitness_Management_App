@@ -4,18 +4,20 @@ import { Database } from './db/mongoose'
 import { AthleteRouter } from './routes/athlete'
 import { SessionRPERouter } from './routes/sRPE'
 import { POMSRouter } from './routes/POMS'
-
+import { CoachRouter } from './routes/coach'
 
 export class App {
     app: Express
     port: string | undefined
     athleteRouter: AthleteRouter
+    coachRouter: CoachRouter
     sessionRPERouter: SessionRPERouter
     POMSRouter: POMSRouter
-    
+
     constructor() {
         this.app = express()
         this.athleteRouter = new AthleteRouter()
+        this.coachRouter = new CoachRouter()
         this.sessionRPERouter = new SessionRPERouter()
         this.POMSRouter = new POMSRouter()
         this.enviromentVariables()
@@ -55,7 +57,8 @@ export class App {
     }
 
     routes(): void {
-        this.app.use(this.athleteRouter.registerRoutes())
+        this.app.use(this.coachRouter.registerRoutes())
+            .use(this.athleteRouter.registerRoutes())
             .use(this.sessionRPERouter.registerRoutes())
             .use(this.POMSRouter.registerRoutes())
     }

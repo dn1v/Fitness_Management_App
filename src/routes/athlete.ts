@@ -1,7 +1,7 @@
 import { AthleteController } from "../controllers/athlete";
 import { Router } from "express";
 import { Endpoints } from "../constants/endpoints";
-import { Auth } from "../authentication/authentication";
+import { Auth } from "../auth/auth";
 import { AppRouter } from "./appRouter";
 
 export class AthleteRouter extends AppRouter {
@@ -12,16 +12,16 @@ export class AthleteRouter extends AppRouter {
     }
 
     registerRoutes(): Router {
-        return super.registerRoutes().post(Endpoints.USERS, this.controller.createAthlete)
-            .post(Endpoints.USERS_LOGIN, this.controller.loginAthlete)
-            .post(Endpoints.USERS_LOGOUT, Auth.authenticate, this.controller.logoutAthlete)
-            .post(Endpoints.USERS_LOGOUTALL, Auth.authenticate, this.controller.logoutAll)
-            .get(Endpoints.USERS_ME, Auth.authenticate, this.controller.readAthlete)
-            .patch(Endpoints.USERS_ME, Auth.authenticate, this.controller.updateAthlete)
-            .delete(Endpoints.USERS_ME, Auth.authenticate, this.controller.deleteAthlete)
-            .post(Endpoints.USERS_ME_PROFILEPIC, Auth.authenticate, this.controller.uploadPhoto)
-            .delete(Endpoints.USERS_ME_PROFILEPIC, Auth.authenticate, this.controller.deletePhoto)
-            .get(Endpoints.USERS_ID_PROFILEPIC, Auth.authenticate, this.controller.getPhoto)
+        return super.registerRoutes().post(Endpoints.ATHLETES, Auth.authorization.bind('athlete'), this.controller.createAthlete)
+            .post(Endpoints.ATHLETES_LOGIN, this.controller.loginAthlete)
+            .post(Endpoints.ATHLETES_LOGOUT, Auth.authenticate, this.controller.logoutAthlete)
+            .post(Endpoints.ATHLETES_LOGOUTALL, Auth.authenticate, this.controller.logoutAll)
+            .get(Endpoints.ATHLETES_ME, Auth.authenticate, this.controller.readAthlete)
+            .patch(Endpoints.ATHLETES_ME, Auth.authenticate, this.controller.updateAthlete)
+            .delete(Endpoints.ATHLETES_ME, Auth.authenticate, this.controller.deleteAthlete)
+            .post(Endpoints.ATHLETES_ME_PROFILEPIC, Auth.authenticate, this.controller.uploadPhoto)
+            .delete(Endpoints.ATHLETES_ME_PROFILEPIC, Auth.authenticate, this.controller.deletePhoto)
+            .get(Endpoints.ATHLETES_ID_PROFILEPIC, Auth.authenticate, this.controller.getPhoto)
     }
 }
 

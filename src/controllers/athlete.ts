@@ -25,7 +25,6 @@ export class AthleteController {
     }
 
     public async createAthlete(req: Request, res: Response): Promise<void> {
-        if (req.body.role === 'athlete') {}
         const athlete = new Athlete(req.body)
         try {
             const token: string = await athlete.generateToken()
@@ -33,11 +32,6 @@ export class AthleteController {
             res.status(201).send({ athlete, token })
         } catch (e) {
             res.status(400).send(e)
-        }
-        try {
-            
-        } catch (error) {
-            
         }
     }
 

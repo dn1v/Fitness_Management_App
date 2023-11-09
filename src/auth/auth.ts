@@ -7,7 +7,6 @@ import { DecodedToken } from '../interfaces/decodedToken.interface'
 export class Auth {
 
     static async authenticate(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-
         try {
             console.log("auth here")
             const token = req.header('Authorization')?.replace('Bearer ', '')
@@ -22,6 +21,15 @@ export class Auth {
         } catch (e) {
             res.status(401).send()
         }
+    }
 
+    static async authorization(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+        if (req.body.role !== 'coach' && req.body.role !== 'athlete') {
+            return res.status(400).send({ message: 'The role you provided does not exist.' })
+        }
+
+        if (req.body.role === this) {
+            next()
+        }
     }
 }
