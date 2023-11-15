@@ -12,16 +12,70 @@ export class AthleteRouter extends AppRouter {
     }
 
     registerRoutes(): Router {
-        return super.registerRoutes().post(Endpoints.ATHLETES, Auth.authorization.bind('athlete'), this.controller.createAthlete)
-            .post(Endpoints.ATHLETES_LOGIN, this.controller.loginAthlete)
+        return super.registerRoutes().post(Endpoints.ATHLETES, Auth.authorization.bind(process.env.ATHLETE), this.controller.createAthlete)
+            .post(Endpoints.ATHLETES_LOGIN, Auth.loginRoleCheck.bind(process.env.ATHLETE), this.controller.loginAthlete)
             .post(Endpoints.ATHLETES_LOGOUT, Auth.authenticate, this.controller.logoutAthlete)
             .post(Endpoints.ATHLETES_LOGOUTALL, Auth.authenticate, this.controller.logoutAll)
             .get(Endpoints.ATHLETES_ME, Auth.authenticate, this.controller.readAthlete)
             .patch(Endpoints.ATHLETES_ME, Auth.authenticate, this.controller.updateAthlete)
             .delete(Endpoints.ATHLETES_ME, Auth.authenticate, this.controller.deleteAthlete)
+            .post(Endpoints.ATHLETES_ME_CONNECTION, Auth.authenticate, this.controller.connectionRequest)
             .post(Endpoints.ATHLETES_ME_PROFILEPIC, Auth.authenticate, this.controller.uploadPhoto)
             .delete(Endpoints.ATHLETES_ME_PROFILEPIC, Auth.authenticate, this.controller.deletePhoto)
             .get(Endpoints.ATHLETES_ID_PROFILEPIC, Auth.authenticate, this.controller.getPhoto)
     }
+    // registerRoutes(): Router {
+    //     return super.registerRoutes()
+    //         .post(
+    //             Endpoints.ATHLETES,
+    //             Auth.authorization.bind(process.env.ATHLETE),
+    //             this.controller.createAthlete
+    //         )
+    //         .post(
+    //             Endpoints.ATHLETES_LOGIN,
+    //             Auth.loginRoleCheck.bind(process.env.ATHLETE),
+    //             this.controller.loginAthlete
+    //         )
+    //         .post(
+    //             Endpoints.ATHLETES_LOGOUT,
+    //             Auth.authenticate,
+    //             this.controller.logoutAthlete
+    //         )
+    //         .post(
+    //             Endpoints.ATHLETES_LOGOUTALL,
+    //             Auth.authenticate,
+    //             this.controller.logoutAll
+    //         )
+    //         .get(
+    //             Endpoints.ATHLETES_ME,
+    //             Auth.authenticate,
+    //             this.controller.readAthlete
+    //         )
+    //         .patch(
+    //             Endpoints.ATHLETES_ME,
+    //             Auth.authenticate,
+    //             this.controller.updateAthlete
+    //         )
+    //         .delete(
+    //             Endpoints.ATHLETES_ME,
+    //             Auth.authenticate,
+    //             this.controller.deleteAthlete
+    //         )
+    //         .post(
+    //             Endpoints.ATHLETES_ME_PROFILEPIC,
+    //             Auth.authenticate,
+    //             this.controller.uploadPhoto
+    //         )
+    //         .delete(
+    //             Endpoints.ATHLETES_ME_PROFILEPIC,
+    //             Auth.authenticate,
+    //             this.controller.deletePhoto
+    //         )
+    //         .get(
+    //             Endpoints.ATHLETES_ID_PROFILEPIC,
+    //             Auth.authenticate,
+    //             this.controller.getPhoto
+    //         );
+    // }
 }
 

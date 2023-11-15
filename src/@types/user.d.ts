@@ -6,4 +6,4 @@ declare module 'mongoose' {
   }
 }
 
-export type Role = 'athlete' | 'coach'
+export type Role = 'Athlete' | 'Coach'

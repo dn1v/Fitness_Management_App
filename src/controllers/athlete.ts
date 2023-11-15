@@ -4,13 +4,14 @@ import { Request, Response } from "express";
 import sharp from "sharp";
 import { SessionRPE } from "../models/sRPE";
 import { POMS } from "../models/POMS";
+import { Coach } from "../models/coach";
 
 export class AthleteController {
 
     private readonly allowedUpdates: string[]
 
     constructor() {
-        this.allowedUpdates = ['firstName', 'lastName', 'password', 'height', 'weight', 'age']
+        this.allowedUpdates = ['firstName', 'lastName', 'password', 'dateOfBirth', 'sport']
         this.createAthlete = this.createAthlete.bind(this)
         this.loginAthlete = this.loginAthlete.bind(this)
         this.readAthlete = this.readAthlete.bind(this)
@@ -35,10 +36,10 @@ export class AthleteController {
         }
     }
 
-    public async loginAthlete(req: Request, res: Response): Promise<void> {
+    public async loginAthlete(req: Request, res: Response): Promise<Response | void> {
         try {
-            console.log(req.headers)
-            const athlete = await Athlete.credentialsCheck(req.body.email, req.body.password)
+            if (!req.athlete) return res.status(401).send()
+            const athlete = req.athlete
             const token = await athlete.generateToken()
             res.send({ athlete, token })
         } catch (e) {
@@ -67,10 +68,12 @@ export class AthleteController {
     }
 
     public async readAthlete(req: Request, res: Response): Promise<void> {
-        try {
-            res.send({ athlete: req.athlete, token: req.token })
-        } catch (e) {
-            res.status(500).send(e)
+        if (req.athlete) {
+            try {
+                res.send({ athlete: req.athlete, token: req.token })
+            } catch (e) {
+                res.status(500).send(e)
+            }
         }
     }
 
@@ -132,6 +135,20 @@ export class AthleteController {
             res.send(athlete.profilePhoto)
         } catch (e) {
             res.status(404).send()
+        }
+    }
+
+    public async connectionRequest(req: Request, res: Response): Promise<Response | void> {
+        try {
+            const email = req.body.email
+            const coach = await Coach.findOne({ email })
+            if (!coach) return res.status(404).send({ message: "Coach with provided email does not exist." })
+            coach.pending.push(req.athlete._id)
+            await coach.save()
+            res.status(201).send({ message: "Request sent." })
+        } catch (e) {
+            console.error(e)
+            res.send(500).send({ message: "Internal server error." })
         }
     }
 

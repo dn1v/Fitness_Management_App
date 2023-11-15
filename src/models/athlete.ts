@@ -9,9 +9,9 @@ const athleteSchema: Schema<IAthlete> = new Schema({
     role: {
         type: String,
         required: true,
-        default: 'athlete',
+        default: 'Athlete',
         validate(value: string) {
-            if (value !== 'athlete') {
+            if (value !== 'Athlete') {
                 throw new Error("Role property must be 'athlete'.")
             }
         }
@@ -19,6 +19,10 @@ const athleteSchema: Schema<IAthlete> = new Schema({
     sport: {
         type: String,
     },
+    coaches: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Coach'
+        }]
 }, {
     timestamps: true
 })

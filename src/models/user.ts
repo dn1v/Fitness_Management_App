@@ -3,7 +3,6 @@ import validator from "validator";
 import jsonwebtoken from 'jsonwebtoken'
 import * as bcrypt from 'bcryptjs'
 import { IUser } from "../interfaces/user.interface";
-import { Role } from "../@types/user";
 
 const userSchema: Schema<IUser> = new Schema({
     firstName: {
