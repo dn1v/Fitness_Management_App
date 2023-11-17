@@ -5,6 +5,7 @@ import sharp from "sharp";
 import { SessionRPE } from "../models/sRPE";
 import { POMS } from "../models/POMS";
 import { Coach } from "../models/coach";
+import { User } from "../models/user";
 
 export class AthleteController {
 
@@ -144,12 +145,36 @@ export class AthleteController {
             const coach = await Coach.findOne({ email })
             if (!coach) return res.status(404).send({ message: "Coach with provided email does not exist." })
             coach.pending.push(req.athlete._id)
+            req.athlete.pending.push(coach._id)
             await coach.save()
+            await req.athlete.save()
             res.status(201).send({ message: "Request sent." })
         } catch (e) {
             console.error(e)
             res.send(500).send({ message: "Internal server error." })
         }
+    }
+
+    public async acceptConnectionRequest(req: Request, res: Response): Promise<Response | void> {
+        try {
+            if (!req.params.id) return res.status(400).send({ message: 'ID not provided' })
+            const coach = await User.findOne({ _id: req.params.id })
+            if (!coach) res.status(404).send()
+            if (req.athlete.coaches.includes(coach._id)) return res.status(400).send({ message: 'Already connected with the user.' })
+            req.athlete.coaches.push(coach._id)
+            req.athlete.pending = req.athlete.pending.filter((id: string) => id === coach._id)
+            coach.athletes.push(req.athlete._id)
+            coach.pending = coach.pending.filter((id: string) => id === req.athlete._id)
+            await req.athlete.save()
+            await coach.save()
+            res.status(201).send({ message: 'Connection successful' })
+        } catch (e) {
+            res.status(500).send(e)
+        }
+    }
+
+    public async declineConnectionRequest(req: Request, res: Response): Promise<Response | void> {
+        
     }
 
     private updateCheck(updates: string[]): boolean {

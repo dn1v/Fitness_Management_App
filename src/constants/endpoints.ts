@@ -24,6 +24,8 @@ export enum Endpoints {
     SESSIONRPE_ID = '/sessionRPE/:id',
     POMS = '/poms',
     POMS_ID = '/poms/:id',
-    ATHLETES_ME_CONNECTION = '/athletes/me/connection'
+    ATHLETES_ME_CONNECTION = '/athletes/me/connection',
+    COACHES_ME_CONNECTIONS = '/coaches/me/connections',
+    COACHES_ME_CONNECTIONS_ID = '/coaches/me/connections/:id'
 }
 

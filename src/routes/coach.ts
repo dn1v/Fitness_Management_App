@@ -37,7 +37,7 @@ export class CoachRouter extends AppRouter {
                 this.controller.logoutAll
             )
             .get(
-                Endpoints.COACHES,
+                Endpoints.COACHES_ME,
                 Auth.authenticate,
                 this.controller.readCoach
             )
@@ -65,6 +65,16 @@ export class CoachRouter extends AppRouter {
                 Endpoints.COACHES_ME_PROFILEPIC,
                 Auth.authenticate,
                 this.controller.deletePhoto
+            )
+            .get(
+                Endpoints.COACHES_ME_CONNECTIONS,
+                Auth.authenticate,
+                this.controller.getConnectionRequests
+            )
+            .post(
+                Endpoints.COACHES_ME_CONNECTIONS_ID,
+                Auth.authenticate,
+                this.controller.acceptConnectionRequest
             )
     }
 }  

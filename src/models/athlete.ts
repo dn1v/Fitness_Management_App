@@ -15,14 +15,18 @@ const athleteSchema: Schema<IAthlete> = new Schema({
                 throw new Error("Role property must be 'athlete'.")
             }
         }
-    }, 
+    },
     sport: {
         type: String,
     },
     coaches: [{
-            type: Schema.Types.ObjectId,
-            ref: 'Coach'
-        }]
+        type: Schema.Types.ObjectId,
+        ref: 'Coach'
+    }],
+    pending: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Coach'
+    }]
 }, {
     timestamps: true
 })
@@ -34,8 +38,8 @@ athleteSchema.virtual('sRPE', {
 })
 
 athleteSchema.virtual('pomsQ', {
-    ref: 'POMS', 
-    localField: '_id', 
+    ref: 'POMS',
+    localField: '_id',
     foreignField: 'owner'
 })
 

@@ -5,4 +5,5 @@ export interface IAthlete extends IUser {
     dateOfBirth?: Date;
     sport?: string;
     coaches?: ObjectId[];
+    pending?: ObjectId[];
 }

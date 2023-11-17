@@ -1,7 +1,9 @@
 import { Coach } from "../models/coach";
+import { User } from "../models/user";
 import { Request, Response } from "express";
 import { ObjectId } from "mongoose";
 import sharp from "sharp";
+import { ResolutionMode } from "typescript";
 
 export class CoachController {
 
@@ -20,6 +22,7 @@ export class CoachController {
         this.updateCheck = this.updateCheck.bind(this)
         this.logoutCoach = this.logoutCoach.bind(this)
         this.logoutAll = this.logoutAll.bind(this)
+        this.getConnectionRequests = this.getConnectionRequests.bind(this)
     }
 
     public async createCoach(req: Request, res: Response): Promise<void> {
@@ -68,7 +71,7 @@ export class CoachController {
     public async readCoach(req: Request, res: Response): Promise<void> {
         console.log('This fired')
         try {
-            
+
             res.send({ coach: req.coach, token: req.token })
         } catch (e) {
             res.status(500).send(e)
@@ -129,6 +132,67 @@ export class CoachController {
             res.send(coach.profilePhoto)
         } catch (e) {
             res.status(404).send()
+        }
+    }
+
+    public async getConnectionRequests(req: Request, res: Response): Promise<Response | void> {
+        try {
+            //if (!req.coach.pending.length) return res.status(404).send()
+            const connectionRequests = await User.find().where('_id').in(req.coach.pending).exec()
+            console.log("CONNECTIONS", connectionRequests)
+            res.send({ requests: connectionRequests })
+        } catch (e) {
+            res.status(500).send(e)
+        }
+    }
+
+    public async acceptConnectionRequest(req: Request, res: Response): Promise<Response | void> {
+        try {
+            if (!req.params.id) return res.status(400).send({ message: 'ID not provided' })
+            const athlete = await User.findOne({ _id: req.params.id })
+            if (!athlete) res.status(404).send()
+            if (req.coach.athletes.includes(athlete._id)) return res.status(400).send({ message: 'Already connected with the user.' })
+            req.coach.athletes.push(req.params.id)
+            req.coach.pending = req.coach.pending.filter((id: string) => id === athlete._id)
+            athlete.coaches.push(req.coach._id)
+            athlete.pending = athlete.pending.filter((id: string) => id === req.coach._id)
+            await req.coach.save()
+            await athlete.save()
+            res.status(201).send({ message: 'Connection successful' })
+        } catch (e) {
+            res.status(500).send()
+        }
+    }
+
+    public async declineConnectionRequest(req: Request, res: Response): Promise<Response | void> {
+        try {
+            if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
+            if (!req.coach.pending.includes(req.params.id)) return res.status(404).send({ message: 'User not on the request list.' })
+            req.coach.pending = req.coach.pending.filter((id: string) => id === athlete._id)
+            const athlete = await User.findOne({ _id: req.params.id })
+            if (!athlete) return res.status(404).send()
+            athlete.pending = athlete.pending.filter((id: string) => id === req.coach._id)
+            await athlete.save()
+            await req.coach.save()
+            res.status(201).send({ message: 'Connection declined.' })
+        } catch (e) {
+            res.status(500).send(e)
+        }
+    }
+
+    public async removeAthleteConnection(req: Request, res: Response): Promise<Response | void> {
+        try {
+            if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
+            if (!req.coach.athletes.includes(req.params.id)) return res.status(404).send({ message: 'Not connected.' })
+            const athlete = User.findOne({ _id: req.params.id })
+            if (!athlete) return res.status(404).send({ message: 'User does not exist.' })
+            req.coach.athletes = req.coach.athletes.filter((id: string) => id === athlete._id)
+            athlete.coaches = athlete.coaches.filter((id: string) => id === req.coach._id)
+            await req.coach.save()
+            await athlete.save()
+            res.status(201).send({ message: 'Athlete removed from the athletes list.'})
+        } catch (e) {
+            res.status(500).send(e)
         }
     }
 
