@@ -1,3 +1,5 @@
+import { IPOMS } from "../interfaces/POMS.interface";
+import { IAthlete } from "../interfaces/athlete.interface";
 import { POMS } from "../models/POMS";
 import { Request, Response } from "express";
 

@@ -174,7 +174,19 @@ export class AthleteController {
     }
 
     public async declineConnectionRequest(req: Request, res: Response): Promise<Response | void> {
-        
+        try {
+            if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
+            if (req.athlete.coaches.includes(req.params.id)) return res.status(400).send({ message: 'Already connected with the user.' })
+            req.athlete.pending = req.coach.pending.filter((id: string) => id === athlete._id)
+            const athlete = await User.findOne({ _id: req.params.id })
+            if (!athlete) return res.status(404).send()
+            athlete.pending = athlete.pending.filter((id: string) => id === req.coach._id)
+            await athlete.save()
+            await req.coach.save()
+            res.status(201).send({ message: 'Connection declined.' })
+        } catch (e) {
+            res.status(500).send(e)
+        }
     }
 
     private updateCheck(updates: string[]): boolean {

@@ -26,6 +26,9 @@ export enum Endpoints {
     POMS_ID = '/poms/:id',
     ATHLETES_ME_CONNECTION = '/athletes/me/connection',
     COACHES_ME_CONNECTIONS = '/coaches/me/connections',
-    COACHES_ME_CONNECTIONS_ID = '/coaches/me/connections/:id'
+    COACHES_ME_CONNECTIONS_ID = '/coaches/me/connections/:id',
+    COACHES_ME_CONNECTIONS_ACCEPT_ID = '/coaches/me/connections/accept/:id',
+    COACHES_ME_CONNECTIONS_DECLINE_ID = '/coaches/me/connections/decline/:id',
+    COACHES_ME_CONNECTIONS_REMOVE_ID = '/coaches/me/connections/remove/:id',
 }
 

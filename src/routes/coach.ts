@@ -76,5 +76,15 @@ export class CoachRouter extends AppRouter {
                 Auth.authenticate,
                 this.controller.acceptConnectionRequest
             )
+            .post(
+                Endpoints.COACHES_ME_CONNECTIONS_REMOVE_ID,
+                Auth.authenticate,
+                this.controller.removeAthleteConnection
+            )
+            .post(
+                Endpoints.COACHES_ME_CONNECTIONS_DECLINE_ID,
+                Auth.authenticate,
+                this.controller.declineConnectionRequest
+            )
     }
 }  

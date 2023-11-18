@@ -168,7 +168,7 @@ export class CoachController {
         try {
             if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
             if (!req.coach.pending.includes(req.params.id)) return res.status(404).send({ message: 'User not on the request list.' })
-            req.coach.pending = req.coach.pending.filter((id: string) => id === athlete._id)
+            req.coach.pending = req.coach.pending.filter((id: string) => id === req.params.id)
             const athlete = await User.findOne({ _id: req.params.id })
             if (!athlete) return res.status(404).send()
             athlete.pending = athlete.pending.filter((id: string) => id === req.coach._id)
@@ -184,7 +184,7 @@ export class CoachController {
         try {
             if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
             if (!req.coach.athletes.includes(req.params.id)) return res.status(404).send({ message: 'Not connected.' })
-            const athlete = User.findOne({ _id: req.params.id })
+            const athlete = await User.findOne({ _id: req.params.id })
             if (!athlete) return res.status(404).send({ message: 'User does not exist.' })
             req.coach.athletes = req.coach.athletes.filter((id: string) => id === athlete._id)
             athlete.coaches = athlete.coaches.filter((id: string) => id === req.coach._id)
@@ -192,6 +192,7 @@ export class CoachController {
             await athlete.save()
             res.status(201).send({ message: 'Athlete removed from the athletes list.'})
         } catch (e) {
+            console.error(e)
             res.status(500).send(e)
         }
     }
