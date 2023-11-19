@@ -135,6 +135,22 @@ export class CoachController {
         }
     }
 
+    public async connectionRequest(req: Request, res: Response): Promise<Response | void> {
+        try {
+            const email = req.body.email
+            const athlete = await User.findOne({ email })
+            if (!athlete) return res.status(404).send({ message: "User with provided email does not exist." })
+            athlete.pending.push(req.coach._id)
+            req.coach.pending.push(athlete._id)
+            await athlete.save()
+            await req.coach.save()
+            res.status(201).send({ message: "Request sent." })
+        } catch (e) {
+            console.error(e)
+            res.status(500).send({ message: "Internal server error." })
+        }
+    }
+
     public async getConnectionRequests(req: Request, res: Response): Promise<Response | void> {
         try {
             //if (!req.coach.pending.length) return res.status(404).send()
@@ -190,7 +206,7 @@ export class CoachController {
             athlete.coaches = athlete.coaches.filter((id: string) => id === req.coach._id)
             await req.coach.save()
             await athlete.save()
-            res.status(201).send({ message: 'Athlete removed from the athletes list.'})
+            res.status(201).send({ message: 'Removed from the athletes list.'})
         } catch (e) {
             console.error(e)
             res.status(500).send(e)

@@ -176,15 +176,32 @@ export class AthleteController {
     public async declineConnectionRequest(req: Request, res: Response): Promise<Response | void> {
         try {
             if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
-            if (req.athlete.coaches.includes(req.params.id)) return res.status(400).send({ message: 'Already connected with the user.' })
-            req.athlete.pending = req.coach.pending.filter((id: string) => id === athlete._id)
-            const athlete = await User.findOne({ _id: req.params.id })
-            if (!athlete) return res.status(404).send()
-            athlete.pending = athlete.pending.filter((id: string) => id === req.coach._id)
-            await athlete.save()
-            await req.coach.save()
+            if (!req.athlete.pending.includes(req.params.id)) return res.status(404).send({ message: 'User not on the request list.' })
+            req.athlete.pending = req.athlete.pending.filter((id: string) => id === req.params.id)
+            const coach = await User.findOne({ _id: req.params.id })
+            if (!coach) return res.status(404).send()
+            coach.pending = coach.pending.filter((id: string) => id === req.athlete._id)
+            await coach.save()
+            await req.athlete.save()
             res.status(201).send({ message: 'Connection declined.' })
         } catch (e) {
+            res.status(500).send(e)
+        }
+    }
+
+    public async removeCoachConnection(req: Request, res: Response): Promise<Response | void> {
+        try {
+            if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
+            if (!req.athlete.coaches.includes(req.params.id)) return res.status(404).send({ message: 'Not connected.' })
+            const coach = await User.findOne({ _id: req.params.id })
+            if (!coach) return res.status(404).send({ message: 'User does not exist.' })
+            req.athlete.coaches = req.athlete.coaches.filter((id: string) => id === coach._id)
+            coach.athletes = coach.athletes.filter((id: string) => id === req.athlete._id)
+            await req.athlete.save()
+            await coach.save()
+            res.status(201).send({ message: 'Removed from the coaches list.'})
+        } catch (e) {
+            console.error(e)
             res.status(500).send(e)
         }
     }
