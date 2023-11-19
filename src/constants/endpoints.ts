@@ -15,6 +15,8 @@ export enum Endpoints {
     COACHES_ID_PROFILEPIC = '/coaches/:id/profilePic',
     SESSIONRPE = '/sessionRPE',
     SESSIONRPE_ID = '/sessionRPE/:id',
+    SESSIONRPE_COACH_AID = '/sessionRPE/coach/:aid',
+    SESSIONRPE_COACH_AID_SID = '/sessionRPE/coach/:aid/:sid',
     POMS = '/poms',
     POMS_ID = '/poms/:id',
     ATHLETES_ME_CONNECTIONS = '/athletes/me/connections',

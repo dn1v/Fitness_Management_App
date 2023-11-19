@@ -3,7 +3,6 @@ import { User } from "../models/user";
 import { Request, Response } from "express";
 import { ObjectId } from "mongoose";
 import sharp from "sharp";
-import { ResolutionMode } from "typescript";
 
 export class CoachController {
 

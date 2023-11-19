@@ -77,7 +77,7 @@ export class CoachRouter extends AppRouter {
                 this.controller.getConnectionRequests
             )
             .post(
-                Endpoints.COACHES_ME_CONNECTIONS_ID,
+                Endpoints.COACHES_ME_CONNECTIONS_ACCEPT_ID,
                 Auth.authenticate,
                 this.controller.acceptConnectionRequest
             )

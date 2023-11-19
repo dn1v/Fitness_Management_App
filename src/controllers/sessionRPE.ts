@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { SessionRPE } from "../models/sRPE";
+import { Coach } from "../models/coach";
+import { Athlete } from "../models/athlete";
 
 export class SessionRPEController {
 
@@ -42,7 +44,39 @@ export class SessionRPEController {
             })
             res.send(req.athlete.sRPE)
         } catch (e) {
-            res.status(500).send()
+            res.status(500).send(e)
+        }
+    }
+
+    public async coachReadSessionRPEs(req: Request, res: Response): Promise<Response | void> {
+        try {
+            if (!req.params.aid) return res.status(400).send({ message: 'ID not provided' })
+            const athlete = await Athlete.findOne({ _id: req.params.aid })
+            if (!athlete) return res.status(404).send({ message: 'User not found.' })
+            if (!athlete.coaches.includes(req.coach._id)) return res.status(400).send({ message: "User is not on your coaching list." })
+            await athlete.populate({
+                path: 'sRPE',
+                match: req.match,
+                options: req.options
+            })
+            res.send(athlete.sRPE)
+        } catch (e) {
+            console.error(e)
+            res.status(500).send(e)
+        }
+    }
+
+    public async coachReadSessionRPE(req: Request, res: Response): Promise<Response | void> {
+        try {
+            if (!req.params.aid || !req.params.sid) return res.status(400).send({ message: 'Athlete or Session RPE ID not provided.' })
+            const athlete = await Athlete.findOne({ _id: req.params.aid })
+            if (!athlete) return res.status(404).send({ message: 'User not found.' })
+            const sessionRPE = await SessionRPE.findOne({ _id: req.params.sid, owner: req.params.aid })
+            if (!sessionRPE) return res.status(404).send({ message: 'Session RPE not found.' })
+            res.send({ sRPE: sessionRPE })
+        } catch (e) {
+            console.error(e)
+            res.status(500).send(e)
         }
     }
 
