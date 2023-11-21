@@ -25,7 +25,6 @@ export class AthleteController {
         this.updateAthlete = this.updateAthlete.bind(this)
         this.deleteAthlete = this.deleteAthlete.bind(this)
         this.uploadPhoto = this.uploadPhoto.bind(this)
-        this.updateCheck = this.updateCheck.bind(this)
         this.getPhoto = this.getPhoto.bind(this)
         this.deletePhoto = this.deletePhoto.bind(this)
         this.logoutAthlete = this.logoutAthlete.bind(this)
