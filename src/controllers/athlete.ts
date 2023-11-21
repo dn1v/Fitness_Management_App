@@ -1,11 +1,16 @@
 import { ObjectId } from "mongoose";
 import { Athlete } from "../models/athlete";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import sharp from "sharp";
 import { SessionRPE } from "../models/sRPE";
 import { POMS } from "../models/POMS";
 import { Coach } from "../models/coach";
 import { User } from "../models/user";
+import { UnauthorizedException } from "../exceptions/unauthorizedException";
+import { HttpException } from "../exceptions/httpExceptions";
+import { NotFoundException } from "../exceptions/notFoundException";
+import { BadRequestException } from "../exceptions/badRequestException";
+import { ErrorMessages } from "../constants/errorMessages";
 
 export class AthleteController {
 
@@ -26,62 +31,68 @@ export class AthleteController {
         this.logoutAll = this.logoutAll.bind(this)
     }
 
-    public async createAthlete(req: Request, res: Response): Promise<void> {
+    public async createAthlete(req: Request, res: Response, next: NextFunction): Promise<void> {
         const athlete = new Athlete(req.body)
         try {
             const token: string = await athlete.generateToken()
             await athlete.save()
             res.status(201).send({ athlete, token })
         } catch (e) {
-            res.status(400).send(e)
+            // res.status(400).send(e)
+            next(new BadRequestException(ErrorMessages.BAD_REQUEST))
         }
     }
 
-    public async loginAthlete(req: Request, res: Response): Promise<Response | void> {
+    public async loginAthlete(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            if (!req.athlete) return res.status(401).send()
+            if (!req.athlete) return next(new UnauthorizedException(ErrorMessages.UNAUTHORIZED_REQUEST))
             const athlete = req.athlete
             const token = await athlete.generateToken()
             res.send({ athlete, token })
         } catch (e) {
-            res.status(400).send(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async logoutAthlete(req: Request, res: Response): Promise<void> {
+    public async logoutAthlete(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             req.athlete.tokens = req.athlete.tokens.filter((token: { token: string, _id: ObjectId }) => token.token !== req.token)
             await req.athlete.save()
             res.send()
         } catch (e) {
-            res.status(500).send()
+            // res.status(500).send()
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async logoutAll(req: Request, res: Response): Promise<void> {
+    public async logoutAll(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             req.athlete.tokens = []
             await req.athlete.save()
             res.send()
         } catch (e) {
-            res.status(500).send()
+            // res.status(500).send()
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+
         }
     }
 
-    public async readAthlete(req: Request, res: Response): Promise<void> {
+    public async readAthlete(req: Request, res: Response, next: NextFunction): Promise<void> {
         if (req.athlete) {
             try {
                 res.send({ athlete: req.athlete, token: req.token })
             } catch (e) {
-                res.status(500).send(e)
+                // res.status(500).send(e)
+                next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
             }
         }
     }
 
-    public async updateAthlete(req: Request, res: Response): Promise<void> {
+    public async updateAthlete(req: Request, res: Response, next: NextFunction): Promise<void> {
         const updates = Object.keys(req.body)
         if (!this.updateCheck(updates)) {
-            res.status(400).send()
+            // res.status(400).send()
+            return next(new BadRequestException(ErrorMessages.BAD_REQUEST))
         }
 
         try {
@@ -199,7 +210,7 @@ export class AthleteController {
             coach.athletes = coach.athletes.filter((id: string) => id === req.athlete._id)
             await req.athlete.save()
             await coach.save()
-            res.status(201).send({ message: 'Removed from the coaches list.'})
+            res.status(201).send({ message: 'Removed from the coaches list.' })
         } catch (e) {
             console.error(e)
             res.status(500).send(e)

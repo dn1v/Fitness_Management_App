@@ -3,23 +3,29 @@ import { Request, Response, NextFunction } from 'express'
 import { Secret } from 'jsonwebtoken'
 import { DecodedToken } from '../interfaces/decodedToken.interface'
 import { User } from '../models/user'
+import { UnauthorizedException } from '../exceptions/unauthorizedException'
+import { ErrorMessages } from '../constants/errorMessages'
+import { BadRequestException } from '../exceptions/badRequestException'
 
 export class Auth {
 
     static async authenticate(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
             const token = req.header('Authorization')?.replace('Bearer ', '')
-            if (token === undefined) throw new Error('Token not provided.')
+            if (token === undefined) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Token not provided.' }))
             const decoded = await jsonwebtoken.verify(token, process.env.JWT_SECRET as Secret) as DecodedToken
-            if (!decoded) throw new Error('Invalid token.')
+            console.log(decoded)
             const user = await User.findOne({ _id: decoded._id, 'tokens.token': token }).exec()
-            if (!user) throw new Error('Unable to find the user.')
             if (user.__t === 'Coach') req.coach = user
             if (user.__t === 'Athlete') req.athlete = user
             req.token = token
             next()
         } catch (e) {
-            res.status(401).send()
+            console.log('test catch')
+            next(new UnauthorizedException(
+                ErrorMessages.UNAUTHORIZED_REQUEST,
+                { reason: 'Invalid token or user with the provided token does not exist.' }
+            ))
         }
     }
 
@@ -34,10 +40,16 @@ export class Auth {
     }
 
     static async loginRoleCheck(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-        const user = await User.credentialsCheck(req.body.email, req.body.password)
-        console.log(user)
-        if (user.__t === 'Athlete') req.athlete = user
-        if (user.__t === 'Coach') req.coach = user
-        next()
+        try {
+            console.log('test')
+            const user = await User.credentialsCheck(req.body.email, req.body.password)
+            console.log(user)
+            if (user.__t === 'Athlete') req.athlete = user
+            if (user.__t === 'Coach') req.coach = user
+
+            next()
+        } catch (error) {
+            next(error)
+        }
     }
 }

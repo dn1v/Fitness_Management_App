@@ -3,6 +3,11 @@ import validator from "validator";
 import jsonwebtoken from 'jsonwebtoken'
 import * as bcrypt from 'bcryptjs'
 import { IUser } from "../interfaces/user.interface";
+import { NextFunction } from "express";
+import { UnauthorizedException } from "../exceptions/unauthorizedException";
+import { BadRequestException } from "../exceptions/badRequestException";
+import { NotFoundException } from "../exceptions/notFoundException";
+import { ErrorMessages } from "../constants/errorMessages";
 
 const userSchema: Schema<IUser> = new Schema({
     firstName: {
@@ -66,9 +71,10 @@ userSchema.methods.generateToken = async function () {
 
 userSchema.statics.credentialsCheck = async function (email: string, password: string): Promise<IUser | void> {
     const user = await User.findOne({ email }).exec()
-    if (!user) throw new Error('User does not exist.')
+    // if (!user) throw new Error('User does not exist.')
+    if (!user) throw new NotFoundException(ErrorMessages.USER_NOT_FOUND, { reason: email })
     const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) throw new Error('Invalid password.')
+    if (!isMatch) throw new BadRequestException(ErrorMessages.INVALID_PASSWORD, { reason: password})
     return user
 }
 

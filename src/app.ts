@@ -5,6 +5,8 @@ import { AthleteRouter } from './routes/athlete'
 import { SessionRPERouter } from './routes/sRPE'
 import { POMSRouter } from './routes/POMS'
 import { CoachRouter } from './routes/coach'
+import { HttpException } from './exceptions/httpExceptions'
+import { ErrorMessages } from './constants/errorMessages'
 
 export class App {
     app: Express
@@ -50,6 +52,14 @@ export class App {
             next();
         })
         this.routes()
+        this.errorHandler()
+    }
+
+    errorHandler(): void {
+        this.app.use((err: HttpException<any>, req: Request, res: Response, next: NextFunction): void => {
+            const { status = 500, message = ErrorMessages.INTERNAL_SERVER_ERROR, data } = err;
+            res.status(status).send({ error: { message, data } })
+        })
     }
 
     database(): void {
