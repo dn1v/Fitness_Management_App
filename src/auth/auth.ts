@@ -31,7 +31,7 @@ export class Auth {
 
     static async authorization(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         if (req.body.role !== 'Coach' && req.body.role !== 'Athlete') {
-            return res.status(400).send({ message: 'The role you provided does not exist.' })
+            return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Role: ' + req.body.role }))
         }
 
         if (req.body.role === this) {

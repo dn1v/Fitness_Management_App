@@ -11,6 +11,7 @@ import { HttpException } from "../exceptions/httpExceptions";
 import { NotFoundException } from "../exceptions/notFoundException";
 import { BadRequestException } from "../exceptions/badRequestException";
 import { ErrorMessages } from "../constants/errorMessages";
+import { ICoach } from "../interfaces/coach.interface";
 
 export class AthleteController {
 
@@ -29,6 +30,10 @@ export class AthleteController {
         this.deletePhoto = this.deletePhoto.bind(this)
         this.logoutAthlete = this.logoutAthlete.bind(this)
         this.logoutAll = this.logoutAll.bind(this)
+        this.connectionRequest = this.connectionRequest.bind(this)
+        this.acceptConnectionRequest = this.acceptConnectionRequest.bind(this)
+        this.declineConnectionRequest = this.declineConnectionRequest.bind(this)
+        this.removeCoachConnection = this.removeCoachConnection.bind(this)
     }
 
     public async createAthlete(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -38,7 +43,6 @@ export class AthleteController {
             await athlete.save()
             res.status(201).send({ athlete, token })
         } catch (e) {
-            // res.status(400).send(e)
             next(new BadRequestException(ErrorMessages.BAD_REQUEST))
         }
     }
@@ -60,7 +64,6 @@ export class AthleteController {
             await req.athlete.save()
             res.send()
         } catch (e) {
-            // res.status(500).send()
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
@@ -71,7 +74,6 @@ export class AthleteController {
             await req.athlete.save()
             res.send()
         } catch (e) {
-            // res.status(500).send()
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
 
         }
@@ -82,7 +84,6 @@ export class AthleteController {
             try {
                 res.send({ athlete: req.athlete, token: req.token })
             } catch (e) {
-                // res.status(500).send(e)
                 next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
             }
         }
@@ -91,20 +92,18 @@ export class AthleteController {
     public async updateAthlete(req: Request, res: Response, next: NextFunction): Promise<void> {
         const updates = Object.keys(req.body)
         if (!this.updateCheck(updates)) {
-            // res.status(400).send()
             return next(new BadRequestException(ErrorMessages.BAD_REQUEST))
         }
-
         try {
             updates.forEach((update: string) => req.athlete[update] = req.body[update])
             await req.athlete.save()
             res.send({ athlete: req.athlete, token: req.token })
         } catch (e) {
-            res.status(500).send()
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async deleteAthlete(req: Request, res: Response): Promise<void> {
+    public async deleteAthlete(req: Request, res: Response, next: NextFunction): Promise<void> {
         console.log(req.athlete)
         try {
             // 'remove' as a first argument in pre method on the schema instance depricated
@@ -113,48 +112,51 @@ export class AthleteController {
             const athlete = await Athlete.deleteOne({ _id: req.athlete._id })
             res.send({ deleted: athlete })
         } catch (e) {
-            res.status(500).send(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async uploadPhoto(req: Request, res: Response): Promise<Response | void> {
+    public async uploadPhoto(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            if (!req.file) return res.status(400).send("No file for upload.")
+            if (!req.file) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'File for upload is not provided.' }))
             const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
             req.athlete.profilePhoto = buffer
             await req.athlete.save()
             res.send({ message: 'Profile photo uploaded.' })
         } catch (e) {
-            res.status(500).send()
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async deletePhoto(req: Request, res: Response): Promise<void> {
+    public async deletePhoto(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             req.athlete.profilePhoto = undefined
             await req.athlete.save()
             res.send()
         } catch (e) {
-            res.send(500).send()
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async getPhoto(req: Request, res: Response): Promise<void> {
+    public async getPhoto(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const athlete = await Athlete.findBId(req.params.id)
-            if (!athlete || !athlete.profilePhoto) throw new Error("Athlete or profile photo doesn't exist.")
+            // if (!athlete || !athlete.profilePhoto) throw new Error("Athlete or profile photo doesn't exist.")
+            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+            if (!athlete.profilePhoto) return next(new NotFoundException('Profile photo does not exist.'))
             res.set("Content-Type", 'image/png')
             res.send(athlete.profilePhoto)
         } catch (e) {
-            res.status(404).send()
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async connectionRequest(req: Request, res: Response): Promise<Response | void> {
+    public async connectionRequest(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
             const email = req.body.email
+            if (!email) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Email is not provided.' }))
             const coach = await Coach.findOne({ email })
-            if (!coach) return res.status(404).send({ message: "Coach with provided email does not exist." })
+            if (!coach) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND, { reason: email }))
             coach.pending.push(req.athlete._id)
             req.athlete.pending.push(coach._id)
             await coach.save()
@@ -162,16 +164,26 @@ export class AthleteController {
             res.status(201).send({ message: "Request sent." })
         } catch (e) {
             console.error(e)
-            res.send(500).send({ message: "Internal server error." })
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async acceptConnectionRequest(req: Request, res: Response): Promise<Response | void> {
+    public async acceptConnectionRequest(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            if (!req.params.id) return res.status(400).send({ message: 'ID not provided' })
+            if (!req.params.id) {
+                return next(new BadRequestException(
+                    ErrorMessages.BAD_REQUEST,
+                    { reason: 'User ID is not provided.' }
+                ))
+            }
             const coach = await User.findOne({ _id: req.params.id })
-            if (!coach) res.status(404).send()
-            if (req.athlete.coaches.includes(coach._id)) return res.status(400).send({ message: 'Already connected with the user.' })
+            if (!coach) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+            if (req.athlete.coaches.includes(coach._id)) {
+                return next(new BadRequestException(
+                    ErrorMessages.BAD_REQUEST,
+                    { reason: 'Already connected with the user.' }
+                ))
+            }
             req.athlete.coaches.push(coach._id)
             req.athlete.pending = req.athlete.pending.filter((id: string) => id === coach._id)
             coach.athletes.push(req.athlete._id)
@@ -180,32 +192,49 @@ export class AthleteController {
             await coach.save()
             res.status(201).send({ message: 'Connection successful' })
         } catch (e) {
-            res.status(500).send(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async declineConnectionRequest(req: Request, res: Response): Promise<Response | void> {
+    public async declineConnectionRequest(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
-            if (!req.athlete.pending.includes(req.params.id)) return res.status(404).send({ message: 'User not on the request list.' })
+            if (!req.params.id) {
+                return next(new BadRequestException(
+                    ErrorMessages.BAD_REQUEST,
+                    { reason: 'User ID is not provided.' }
+                ))
+            }
+            if (!req.athlete.pending.includes(req.params.id)) {
+                return next(new NotFoundException(
+                    ErrorMessages.USER_NOT_FOUND,
+                    { reason: 'ID is not on the pending list.' }
+                ))
+            }
             req.athlete.pending = req.athlete.pending.filter((id: string) => id === req.params.id)
             const coach = await User.findOne({ _id: req.params.id })
-            if (!coach) return res.status(404).send()
+            if (!coach) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
             coach.pending = coach.pending.filter((id: string) => id === req.athlete._id)
             await coach.save()
             await req.athlete.save()
             res.status(201).send({ message: 'Connection declined.' })
         } catch (e) {
-            res.status(500).send(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async removeCoachConnection(req: Request, res: Response): Promise<Response | void> {
+    public async removeCoachConnection(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
-            if (!req.athlete.coaches.includes(req.params.id)) return res.status(404).send({ message: 'Not connected.' })
+            if (!req.params.id) {
+                return next(new BadRequestException(
+                    ErrorMessages.BAD_REQUEST,
+                    { reason: 'User ID is not provided.' }
+                ))
+            }
+            if (!req.athlete.coaches.includes(req.params.id)) {
+                return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+            }
             const coach = await User.findOne({ _id: req.params.id })
-            if (!coach) return res.status(404).send({ message: 'User does not exist.' })
+            if (!coach) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
             req.athlete.coaches = req.athlete.coaches.filter((id: string) => id === coach._id)
             coach.athletes = coach.athletes.filter((id: string) => id === req.athlete._id)
             await req.athlete.save()
@@ -213,7 +242,7 @@ export class AthleteController {
             res.status(201).send({ message: 'Removed from the coaches list.' })
         } catch (e) {
             console.error(e)
-            res.status(500).send(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
