@@ -1,7 +1,9 @@
-import { IPOMS } from "../interfaces/POMS.interface";
-import { IAthlete } from "../interfaces/athlete.interface";
+import { ErrorMessages } from "../constants/errorMessages";
+import { BadRequestException } from "../exceptions/badRequestException";
+import { HttpException } from "../exceptions/httpExceptions";
+import { NotFoundException } from "../exceptions/notFoundException";
 import { POMS } from "../models/POMS";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export class POMSController {
 
@@ -24,7 +26,8 @@ export class POMSController {
         this.deletePOMS = this.deletePOMS.bind(this)
     }
 
-    public async createPOMS(req: Request, res: Response): Promise<void> {
+    public async createPOMS(req: Request, res: Response, next: NextFunction): Promise<void> {
+        //ADD CHECK FOR FORBIDDEN FIELDS
         const poms = new POMS({
             ...req.body,
             owner: req.athlete._id
@@ -38,7 +41,7 @@ export class POMSController {
         }
     }
 
-    public async readManyPOMS(req: Request, res: Response): Promise<void> {
+    public async readManyPOMS(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             await req.athlete.populate({
                 path: "pomsQ",
@@ -47,41 +50,46 @@ export class POMSController {
             })
             res.send({ POMS: req.athlete.pomsQ })
         } catch (e) {
-            res.status(500).send(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async readPOMS(req: Request, res: Response): Promise<Response | void> {
+    public async readPOMS(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
             const poms = await POMS.findOne({ _id: req.params.id, owner: req.athlete._id })
-            if (!poms) return res.sendStatus(404)
+            if (!poms) return next(new NotFoundException(ErrorMessages.POMS_404))
             res.send(poms)
         } catch (e) {
-            res.status(500).send(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async updatePOMS(req: Request, res: Response): Promise<Response | void> {
+    public async updatePOMS(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         const updates = Object.keys(req.body)
-        if (this.isNotAllowed(updates)) return res.sendStatus(400)
+        if (this.isNotAllowed(updates)) {
+            return next(new BadRequestException(
+                ErrorMessages.BAD_REQUEST,
+                { reason: 'Invalid update fields. Please check the provided data.' }
+            ))
+        }
         try {
             const poms = await POMS.findOne({ _id: req.params.id, owner: req.athlete._id })
-            if (!poms) return res.sendStatus(404)
+            if (!poms) return next(new NotFoundException(ErrorMessages.POMS_404))
             updates.forEach((update: string) => poms[update] = req.body[update])
             await poms.save()
             res.send(poms)
         } catch (e) {
-            res.status(500).send(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
-    public async deletePOMS(req: Request, res: Response): Promise<Response | void> {
+    public async deletePOMS(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
             const poms = await POMS.findOneAndDelete({ _id: req.params.id, owner: req.athlete._id })
-            if (!poms) return res.sendStatus(404)
+            if (!poms) return next(new NotFoundException(ErrorMessages.POMS_404))
             res.send(poms)
         } catch (e) {
-            res.status(500).send(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 

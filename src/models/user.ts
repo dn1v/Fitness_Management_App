@@ -41,7 +41,7 @@ const userSchema: Schema<IUser> = new Schema({
         type: String,
         enum: ['athlete', 'coach'],
         required: true,
-    }, 
+    },
     tokens: [
         {
             token: {
@@ -71,10 +71,9 @@ userSchema.methods.generateToken = async function () {
 
 userSchema.statics.credentialsCheck = async function (email: string, password: string): Promise<IUser | void> {
     const user = await User.findOne({ email }).exec()
-    // if (!user) throw new Error('User does not exist.')
-    if (!user) throw new NotFoundException(ErrorMessages.USER_NOT_FOUND, { reason: email })
+    if (!user) throw new NotFoundException(ErrorMessages.USER_404, { reason: email })
     const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) throw new BadRequestException(ErrorMessages.INVALID_PASSWORD, { reason: password})
+    if (!isMatch) throw new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: password })
     return user
 }
 
@@ -90,7 +89,8 @@ userSchema.methods.toJSON = function () {
     delete user.password
     delete user.tokens
     delete user.profilePhoto
-
+    delete user.coaches
+    delete user.athletes
     return user
 }
 

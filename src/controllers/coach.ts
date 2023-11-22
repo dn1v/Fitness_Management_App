@@ -132,7 +132,7 @@ export class CoachController {
     public async getPhoto(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const coach = await Coach.findBId(req.params.id)
-            if (!coach) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+            if (!coach) return next(new NotFoundException(ErrorMessages.USER_404))
             if (!coach.profilePhoto) return next(new NotFoundException('Photo does not exist.'))
             res.set("Content-Type", 'image/png')
             res.send(coach.profilePhoto)
@@ -145,7 +145,7 @@ export class CoachController {
         try {
             const email = req.body.email
             const athlete = await User.findOne({ email })
-            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND, { reason: email }))
+            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404, { reason: email }))
             athlete.pending.push(req.coach._id)
             req.coach.pending.push(athlete._id)
             await athlete.save()
@@ -171,7 +171,7 @@ export class CoachController {
         try {
             if (!req.params.id) return res.status(400).send({ message: 'ID not provided' })
             const athlete = await User.findOne({ _id: req.params.id })
-            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404))
             if (req.coach.athletes.includes(athlete._id)) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Already connected with the user.' }))
             req.coach.athletes.push(req.params.id)
             req.coach.pending = req.coach.pending.filter((id: string) => id === athlete._id)
@@ -206,7 +206,7 @@ export class CoachController {
             if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
             if (!req.coach.athletes.includes(req.params.id)) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Not connected.' }))
             const athlete = await User.findOne({ _id: req.params.id })
-            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404))
             req.coach.athletes = req.coach.athletes.filter((id: string) => id === athlete._id)
             athlete.coaches = athlete.coaches.filter((id: string) => id === req.coach._id)
             await req.coach.save()

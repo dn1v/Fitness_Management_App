@@ -1,7 +1,8 @@
 export enum ErrorMessages {
     UNAUTHORIZED_REQUEST = 'Unauthorized access. Please log in to proceed.',
     BAD_REQUEST = 'Invalid request. Please check the provided data.',
-    USER_NOT_FOUND = 'User not found. Please check your credentials.',
-    INVALID_PASSWORD = 'Invalid password. Please provide the correct password.',
+    USER_404 = 'Resource not found. Please check your request.',
     INTERNAL_SERVER_ERROR = 'Oops! Something went wrong. Please try again later.',
+    POMS_404 = 'POMS questionnaire not found. Please review your inputs.',
+    SESSION_RPE_404 = 'Session RPE not found. Please review your inputs.',
 }

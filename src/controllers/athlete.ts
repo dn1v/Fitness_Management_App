@@ -11,13 +11,15 @@ import { HttpException } from "../exceptions/httpExceptions";
 import { NotFoundException } from "../exceptions/notFoundException";
 import { BadRequestException } from "../exceptions/badRequestException";
 import { ErrorMessages } from "../constants/errorMessages";
-import { ICoach } from "../interfaces/coach.interface";
+import { EmailService } from "../email/email";
 
 export class AthleteController {
 
     private readonly allowedUpdates: string[]
+    private emailService: EmailService
 
     constructor() {
+        this.emailService = new EmailService()
         this.allowedUpdates = ['firstName', 'lastName', 'password', 'dateOfBirth', 'sport']
         this.createAthlete = this.createAthlete.bind(this)
         this.loginAthlete = this.loginAthlete.bind(this)
@@ -39,6 +41,11 @@ export class AthleteController {
         const athlete = new Athlete(req.body)
         try {
             const token: string = await athlete.generateToken()
+            this.emailService.sendConfirmationEmail(
+                req.body.firstName,
+                req.body.email,
+                `http://127.0.0.1:3001/confirmation/${token}`
+            )
             await athlete.save()
             res.status(201).send({ athlete, token })
         } catch (e) {
@@ -141,7 +148,7 @@ export class AthleteController {
         try {
             const athlete = await Athlete.findBId(req.params.id)
             // if (!athlete || !athlete.profilePhoto) throw new Error("Athlete or profile photo doesn't exist.")
-            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404))
             if (!athlete.profilePhoto) return next(new NotFoundException('Profile photo does not exist.'))
             res.set("Content-Type", 'image/png')
             res.send(athlete.profilePhoto)
@@ -155,7 +162,7 @@ export class AthleteController {
             const email = req.body.email
             if (!email) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Email is not provided.' }))
             const coach = await Coach.findOne({ email })
-            if (!coach) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND, { reason: email }))
+            if (!coach) return next(new NotFoundException(ErrorMessages.USER_404, { reason: email }))
             coach.pending.push(req.athlete._id)
             req.athlete.pending.push(coach._id)
             await coach.save()
@@ -176,7 +183,7 @@ export class AthleteController {
                 ))
             }
             const coach = await User.findOne({ _id: req.params.id })
-            if (!coach) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+            if (!coach) return next(new NotFoundException(ErrorMessages.USER_404))
             if (req.athlete.coaches.includes(coach._id)) {
                 return next(new BadRequestException(
                     ErrorMessages.BAD_REQUEST,
@@ -205,13 +212,13 @@ export class AthleteController {
             }
             if (!req.athlete.pending.includes(req.params.id)) {
                 return next(new NotFoundException(
-                    ErrorMessages.USER_NOT_FOUND,
+                    ErrorMessages.USER_404,
                     { reason: 'ID is not on the pending list.' }
                 ))
             }
             req.athlete.pending = req.athlete.pending.filter((id: string) => id === req.params.id)
             const coach = await User.findOne({ _id: req.params.id })
-            if (!coach) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+            if (!coach) return next(new NotFoundException(ErrorMessages.USER_404))
             coach.pending = coach.pending.filter((id: string) => id === req.athlete._id)
             await coach.save()
             await req.athlete.save()
@@ -230,10 +237,10 @@ export class AthleteController {
                 ))
             }
             if (!req.athlete.coaches.includes(req.params.id)) {
-                return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+                return next(new NotFoundException(ErrorMessages.USER_404))
             }
             const coach = await User.findOne({ _id: req.params.id })
-            if (!coach) return next(new NotFoundException(ErrorMessages.USER_NOT_FOUND))
+            if (!coach) return next(new NotFoundException(ErrorMessages.USER_404))
             req.athlete.coaches = req.athlete.coaches.filter((id: string) => id === coach._id)
             coach.athletes = coach.athletes.filter((id: string) => id === req.athlete._id)
             await req.athlete.save()

@@ -43,4 +43,10 @@ athleteSchema.virtual('pomsQ', {
     foreignField: 'owner'
 })
 
+// athleteSchema.methods.toJSON = function () {
+//     const user = this.toObject()
+//     delete user.coaches
+//     return user
+// }
+
 export const Athlete = User.discriminator<IAthlete>("Athlete", athleteSchema)
