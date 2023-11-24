@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { SessionRPE } from "../models/sRPE";
-import { Coach } from "../models/coach";
 import { Athlete } from "../models/athlete";
 import { BadRequestException } from "../exceptions/badRequestException";
 import { ErrorMessages } from "../constants/errorMessages";
@@ -61,7 +60,6 @@ export class SessionRPEController {
 
     public async coachReadSessionRPEs(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-
             if (!req.params.aid) {
                 return next(new BadRequestException(
                     ErrorMessages.BAD_REQUEST,
@@ -97,7 +95,7 @@ export class SessionRPEController {
                 ))
             }
             const athlete = await Athlete.findOne({ _id: req.params.aid })
-            if (!athlete) return res.status(404).send({ message: 'User not found.' })
+            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404))
             const sessionRPE = await SessionRPE.findOne({ _id: req.params.sid, owner: req.params.aid })
             if (!sessionRPE) {
                 return next(new NotFoundException(

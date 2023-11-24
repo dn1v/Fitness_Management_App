@@ -4,6 +4,7 @@ import { HttpException } from "../exceptions/httpExceptions";
 import { NotFoundException } from "../exceptions/notFoundException";
 import { POMS } from "../models/POMS";
 import { NextFunction, Request, Response } from "express";
+import { Athlete } from "../models/athlete";
 
 export class POMSController {
 
@@ -28,6 +29,13 @@ export class POMSController {
 
     public async createPOMS(req: Request, res: Response, next: NextFunction): Promise<void> {
         //ADD CHECK FOR FORBIDDEN FIELDS
+        let fields = Object.keys(req.body)
+        if (this.isNotAllowed(fields)) {
+            return next(new BadRequestException(
+                ErrorMessages.BAD_REQUEST,
+                { reason: 'Invalid fields in the request' }
+            ))
+        }
         const poms = new POMS({
             ...req.body,
             owner: req.athlete._id
@@ -37,7 +45,7 @@ export class POMSController {
             await poms.save()
             res.status(201).send(poms)
         } catch (e) {
-            res.status(400).send(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
@@ -60,6 +68,58 @@ export class POMSController {
             if (!poms) return next(new NotFoundException(ErrorMessages.POMS_404))
             res.send(poms)
         } catch (e) {
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
+
+    public async coachReadManyPOMS(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            if (!req.params.aid) {
+                return next(new BadRequestException(
+                    ErrorMessages.BAD_REQUEST,
+                    { reason: 'The request is missing essential identifier(s).' }
+                ))
+            }
+            const athlete = await Athlete.findOne({ _id: req.params.aid })
+            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404))
+            if (!athlete.coaches.includes(req.coach._id)) {
+                return next(new NotFoundException(
+                    ErrorMessages.USER_404,
+                    { reason: "User is not on your coaching list." }
+                ))
+            }
+            await athlete.populate({
+                path: "pomsQ",
+                match: req.match,
+                options: req.options
+            })
+            res.send(athlete.sRPE)
+        } catch (e) {
+            console.error(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
+
+    public async coachReadPOMS(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            if (!req.params.aid) {
+                return next(new BadRequestException(
+                    ErrorMessages.BAD_REQUEST,
+                    { reason: 'Athlete or Session RPE ID not provided.' }
+                ))
+            }
+            const athlete = await Athlete.findOne({ _id: req.params.aid })
+            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404))
+            const poms = await POMS.findOne({ _id: req.params.pid, owner: req.params.aid })
+            if (!poms) {
+                return next(new NotFoundException(
+                    ErrorMessages.POMS_404,
+                    { reason: 'POMS quesionaire with the provided ID does not exist.' }
+                ))
+            }
+            res.send({ POMS: poms })
+        } catch (e) {
+            console.error(e)
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
