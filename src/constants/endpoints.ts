@@ -19,6 +19,8 @@ export enum Endpoints {
     SESSIONRPE_COACH_AID_SID = '/sessionRPE/coach/:aid/:sid',
     POMS = '/poms',
     POMS_ID = '/poms/:id',
+    POMS_COACH_AID = '/poms/coach/:aid',
+    POMS_COACH_AID_SID = 'poms/coach/:aid/:pid',
     ATHLETES_ME_CONNECTIONS = '/athletes/me/connections',
     ATHLETES_ME_CONNECTIONS_ID = '/athletes/me/connections/:id',
     ATHLETES_ME_CONNECTIONS_ACCEPT_ID = '/athletes/me/connections/accept/:id',
