@@ -205,9 +205,9 @@ export class CoachController {
         try {
             if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
             if (!req.coach.athletes.includes(req.params.id)) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Not connected.' }))
+            req.coach.athletes = req.coach.athletes.filter((id: string) => id === req.params.id)
             const athlete = await User.findOne({ _id: req.params.id })
             if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404))
-            req.coach.athletes = req.coach.athletes.filter((id: string) => id === athlete._id)
             athlete.coaches = athlete.coaches.filter((id: string) => id === req.coach._id)
             await req.coach.save()
             await athlete.save()

@@ -25,3 +25,4 @@ export class SessionRPERouter extends AppRouter {
             .get(Endpoints.SESSIONRPE_COACH_AID_SID, Auth.authenticate, this.controller.coachReadSessionRPE)
     }
 }
+

@@ -112,6 +112,7 @@ export class AthleteController {
     public async deleteAthlete(req: Request, res: Response, next: NextFunction): Promise<void> {
         console.log(req.athlete)
         try {
+            // Deleting associated data.
             // 'remove' as a first argument in pre method on the schema instance depricated
             await SessionRPE.deleteMany({ owner: req.athlete._id })
             await POMS.deleteMany({ owner: req.athlete._id })
