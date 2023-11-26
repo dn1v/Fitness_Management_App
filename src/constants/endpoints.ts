@@ -31,5 +31,7 @@ export enum Endpoints {
     COACHES_ME_CONNECTIONS_ACCEPT_ID = '/coaches/me/connections/accept/:id',
     COACHES_ME_CONNECTIONS_DECLINE_ID = '/coaches/me/connections/decline/:id',
     COACHES_ME_CONNECTIONS_REMOVE_ID = '/coaches/me/connections/remove/:id',
+    NOTIFICATIONS = '/notifications',
+    NOTIFICATIONS_ID = '/notifications/:id'
 }
 

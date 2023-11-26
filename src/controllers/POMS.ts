@@ -152,7 +152,11 @@ export class POMSController {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
-
+    /**
+     * Checks if any of the provided updates are in the forbidden updates list.
+     * @param updates - An array of string updates to be checked against forbidden updates.
+     * @returns A boolean indicating whether any update is present in the forbidden updates list.
+     */
     private isNotAllowed(updates: string[]) {
         let notAllowed: boolean = false
         updates.forEach((update: string) => {

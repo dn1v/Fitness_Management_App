@@ -7,6 +7,7 @@ import { POMSRouter } from './routes/POMS'
 import { CoachRouter } from './routes/coach'
 import { HttpException } from './exceptions/httpExceptions'
 import { ErrorMessages } from './constants/errorMessages'
+import { NotificationsRouter } from './routes/notifications'
 
 export class App {
     app: Express
@@ -15,6 +16,7 @@ export class App {
     coachRouter: CoachRouter
     sessionRPERouter: SessionRPERouter
     POMSRouter: POMSRouter
+    notificationsRouter: NotificationsRouter
 
     constructor() {
         this.app = express()
@@ -22,6 +24,7 @@ export class App {
         this.coachRouter = new CoachRouter()
         this.sessionRPERouter = new SessionRPERouter()
         this.POMSRouter = new POMSRouter()
+        this.notificationsRouter = new NotificationsRouter()
         this.enviromentVariables()
         this.port = process.env.PORT
         this.init()
@@ -71,6 +74,7 @@ export class App {
             .use(this.athleteRouter.registerRoutes())
             .use(this.sessionRPERouter.registerRoutes())
             .use(this.POMSRouter.registerRoutes())
+            .use(this.notificationsRouter.registerRoutes())
     }
 }
 

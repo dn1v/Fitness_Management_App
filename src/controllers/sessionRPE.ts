@@ -177,8 +177,8 @@ export class SessionRPEController {
 
     /**
     * Checks if the provided fields are allowed for updates.
-    * @param updates List of fields to be updated.
-    * @param fields Allowed fields for updates.
+    * @param updates - List of fields to be updated.
+    * @param fields - Allowed fields for updates.
     * @returns Boolean indicating whether the updates are allowed or not.
     */
     private fieldsCheck(updates: string[], fields: string[]): boolean {
@@ -189,7 +189,7 @@ export class SessionRPEController {
 
     /**
      * Creates a new SessionRPE instance.
-     * @param req Express request object.
+     * @param req - Express request object.
      * @returns Newly created SessionRPE instance.
      */
     private instantiateSessionRPE(req: Request): typeof SessionRPE | null {
@@ -201,9 +201,9 @@ export class SessionRPEController {
 
     /**
      * Creates a new Notification instance.
-     * @param req Express request object.
-     * @param model Model type for the notification.
-     * @param message Message for the notification.
+     * @param req - Express request object.
+     * @param model - Model type for the notification.
+     * @param message - Message for the notification.
      * @returns Newly created Notification instance.
      */
     private instantiateNotification(req: Request, model: string, message: string) {
