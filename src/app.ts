@@ -8,15 +8,17 @@ import { CoachRouter } from './routes/coach'
 import { HttpException } from './exceptions/httpExceptions'
 import { ErrorMessages } from './constants/errorMessages'
 import { NotificationsRouter } from './routes/notifications'
+import http, { Server } from 'http'
 
 export class App {
-    app: Express
-    port: string | undefined
-    athleteRouter: AthleteRouter
-    coachRouter: CoachRouter
-    sessionRPERouter: SessionRPERouter
-    POMSRouter: POMSRouter
-    notificationsRouter: NotificationsRouter
+    private app: Express
+    private server: Server
+    private port: string | undefined
+    private athleteRouter: AthleteRouter
+    private coachRouter: CoachRouter
+    private sessionRPERouter: SessionRPERouter
+    private POMSRouter: POMSRouter
+    private notificationsRouter: NotificationsRouter
 
     constructor() {
         this.app = express()
@@ -27,26 +29,27 @@ export class App {
         this.notificationsRouter = new NotificationsRouter()
         this.enviromentVariables()
         this.port = process.env.PORT
+        this.server = http.createServer(this.app)
         this.init()
     }
 
-    init(): void {
+    private init(): void {
         this.database()
         this.middlewares()
         this.listening()
     }
 
-    listening(): void {
-        this.app.listen(this.port, () => {
+    private listening(): void {
+        this.server.listen(this.port, () => {
             console.log('Server is up on port', this.port)
         })
     }
 
-    enviromentVariables(): void {
+    private enviromentVariables(): void {
         dotenv.config()
     }
 
-    middlewares(): void {
+    private middlewares(): void {
         this.app.use(express.json())
         this.app.use(function (req: Request, res: Response, next: NextFunction) {
             res.header("Access-Control-Allow-Origin", process.env.CORS_URL);
@@ -58,18 +61,18 @@ export class App {
         this.errorHandler()
     }
 
-    errorHandler(): void {
+    private errorHandler(): void {
         this.app.use((err: HttpException<any>, req: Request, res: Response, next: NextFunction): void => {
             const { status = 500, message = ErrorMessages.INTERNAL_SERVER_ERROR, data } = err;
             res.status(status).send({ error: { message, data } })
         })
     }
 
-    database(): void {
+    private database(): void {
         new Database()
     }
 
-    routes(): void {
+    private routes(): void {
         this.app.use(this.coachRouter.registerRoutes())
             .use(this.athleteRouter.registerRoutes())
             .use(this.sessionRPERouter.registerRoutes())

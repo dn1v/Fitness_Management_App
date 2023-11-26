@@ -32,7 +32,7 @@ export class SessionRPEController {
             ))
         }
         const sRPE = this.instantiateSessionRPE(req)
-        const notification = this.instantiateNotification(req, 'sRPE', 'created new sRPE.')
+        const notification = this.instantiateNotification(req, 'sRPE', 'created new sRPE')
         try {
             await sRPE.save()
             await notification.save()

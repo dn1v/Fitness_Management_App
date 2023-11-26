@@ -28,7 +28,6 @@ export class POMSController {
     }
 
     public async createPOMS(req: Request, res: Response, next: NextFunction): Promise<void> {
-        //ADD CHECK FOR FORBIDDEN FIELDS
         let fields = Object.keys(req.body)
         if (this.isNotAllowed(fields)) {
             return next(new BadRequestException(
