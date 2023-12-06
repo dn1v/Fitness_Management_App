@@ -2,7 +2,7 @@ import { Router } from "express";
 import { AppRouter } from "./appRouter";
 import { POMSController } from "../controllers/POMS";
 import { Endpoints } from "../constants/endpoints";
-import { Auth } from "../auth/auth";
+import { Auth } from "../middlewares/auth";
 
 export class POMSRouter extends AppRouter {
     controller: POMSController

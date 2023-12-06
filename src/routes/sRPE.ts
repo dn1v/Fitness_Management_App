@@ -2,7 +2,7 @@ import { Router } from "express";
 import { AppRouter } from "./appRouter";
 import { SessionRPEController } from "../controllers/sessionRPE";
 import { Endpoints } from "../constants/endpoints";
-import { Auth } from "../auth/auth";
+import { Auth } from "../middlewares/auth";
 
 export class SessionRPERouter extends AppRouter {
     controller: SessionRPEController

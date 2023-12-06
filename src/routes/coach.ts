@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Endpoints } from "../constants/endpoints";
-import { Auth } from "../auth/auth";
+import { Auth } from "../middlewares/auth";
 import { AppRouter } from "./appRouter";
 import { CoachController } from "../controllers/coach";
 import { Roles } from "../constants/roles";

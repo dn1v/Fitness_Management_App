@@ -1,6 +1,6 @@
 import { AppRouter } from "./appRouter";
 import { NotificationController } from "../controllers/notifications";
-import { Auth } from "../auth/auth";
+import { Auth } from "../middlewares/auth";
 import { Endpoints } from "../constants/endpoints";
 import { Router } from "express";
 
