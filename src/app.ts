@@ -1,34 +1,22 @@
 import express, { Request, Response, Express, NextFunction } from 'express'
 import dotenv from 'dotenv'
 import { Database } from './db/mongoose'
-import { AthleteRouter } from './routes/athlete'
-import { SessionRPERouter } from './routes/sRPE'
-import { POMSRouter } from './routes/POMS'
-import { CoachRouter } from './routes/coach'
 import { HttpException } from './exceptions/httpExceptions'
 import { ErrorMessages } from './constants/errorMessages'
-import { NotificationsRouter } from './routes/notifications'
 import http, { Server } from 'http'
 import { Server as SocketIOServer } from 'socket.io'
+import { AppRouter } from './routes/appRouter'
 
 export class App {
     private app: Express
     private server: Server
     private io: SocketIOServer
     private port: string | undefined
-    private athleteRouter: AthleteRouter
-    private coachRouter: CoachRouter
-    private sessionRPERouter: SessionRPERouter
-    private POMSRouter: POMSRouter
-    private notificationsRouter: NotificationsRouter
+    private routers: AppRouter[]
 
-    constructor() {
+    constructor(routers: AppRouter[]) {
         this.app = express()
-        this.athleteRouter = new AthleteRouter()
-        this.coachRouter = new CoachRouter()
-        this.sessionRPERouter = new SessionRPERouter()
-        this.POMSRouter = new POMSRouter()
-        this.notificationsRouter = new NotificationsRouter()
+        this.routers = routers
         this.enviromentVariables()
         this.port = process.env.PORT
         this.server = http.createServer(this.app)
@@ -46,7 +34,6 @@ export class App {
         this.server.listen(this.port, () => {
             console.log('Server is up on port', this.port)
         })
-
         //this.io.listen()
     }
 
@@ -77,12 +64,8 @@ export class App {
         new Database()
     }
 
-    private routes(): void {
-        this.app.use(this.coachRouter.registerRoutes())
-            .use(this.athleteRouter.registerRoutes())
-            .use(this.sessionRPERouter.registerRoutes())
-            .use(this.POMSRouter.registerRoutes())
-            .use(this.notificationsRouter.registerRoutes())
+    private routes(): void {        
+        this.routers.forEach((router: AppRouter) => this.app.use(router.registerRoutes()))
     }
 }
 
