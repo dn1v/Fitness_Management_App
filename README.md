@@ -1,4 +1,4 @@
-# Fitenss Management App
+# Fitness Management App
 
 A minimalistic fitness management application catering to athletes and coaches, providing profile management, secure authentication, interactive connection handling, and precise subjective load monitoring through wellness questionnaires. This app integrates sRPE and POMS methodologies to ensure effective training management and mood state evaluation.
 
