@@ -38,7 +38,7 @@ git clone <repository URL>
 npm install
 ```
 
-4. Set up your environment variables:
+3. Set up your environment variables:
 
 ```bash
 PORT=<port number>
@@ -48,7 +48,7 @@ CORS_URL=<your frontend URL>
 
 ```
 
-5. Start the application:
+4. Start the application:
 
 ```bash
 nodemon exec
