@@ -6,13 +6,12 @@ A minimalistic fitness management application catering to athletes and coaches, 
 
 ### Athletes & Coaches:
 
--   **Profile Management:** Create, update, and delete profiles securely.
--   **Authentication & Sessions:** Login, logout, and manage sessions reliably.
--   **Profile Photo Handling:** Upload, view, and delete profile photos effortlessly.
--   **Connection Management:** Send, receive, and handle connection requests smoothly.
--   **Interactions Handling:** Accept or decline connections efficiently.
--   **Data Security:** Implements robust security measures for user data and interactions.
--   **Error Management:** Manages various exceptions and errors seamlessly.
+-   **Profile Management:** Create, update, and delete profiles.
+-   **Authentication & Sessions:** Login, logout, and manage sessions.
+-   **Profile Photo Handling:** Upload, view, and delete profile photos.
+-   **Connection Management:** Send, receive, and handle connection requests.
+-   **Interactions Handling:** Accept or decline connections.
+-   **Error Management:** Manages various exceptions and errors.
 
 ### Wellness Questionaire & Subjective load monitoring:
 
