@@ -35,7 +35,7 @@ export class CoachRouter extends AppRouter {
             .post(Endpoints.COACHES_ME_CONNECTIONS, Auth.authenticate, this.controller.connectionRequest)
             .get(Endpoints.COACHES_ME_CONNECTIONS, Auth.authenticate, this.controller.getConnectionRequests)
             .post(Endpoints.COACHES_ME_CONNECTIONS_ACCEPT_ID, Auth.authenticate, this.controller.acceptConnectionRequest)
-            .post(Endpoints.COACHES_ME_CONNECTIONS_REMOVE_ID, Auth.authenticate, this.controller.removeAthleteConnection)
+            .post(Endpoints.COACHES_ME_CONNECTIONS_REMOVE_ID, Auth.authenticate, this.controller.removeConnection)
             .post(Endpoints.COACHES_ME_CONNECTIONS_DECLINE_ID, Auth.authenticate, this.controller.declineConnectionRequest);
     }
 }  

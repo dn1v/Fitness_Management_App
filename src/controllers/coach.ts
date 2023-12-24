@@ -141,14 +141,30 @@ export class CoachController {
         }
     }
 
+    // public async connectionRequest(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    //     try {
+    //         const email = req.body.email
+    //         const athlete = await User.findOne({ email })
+    //         if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404, { reason: email }))
+    //         athlete.pending.push(req.coach._id)
+    //         req.coach.pending.push(athlete._id)
+    //         await athlete.save()
+    //         await req.coach.save()
+    //         res.status(201).send({ message: "Request sent." })
+    //     } catch (e) {
+    //         console.error(e)
+    //         next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+    //     }
+    // }
+
     public async connectionRequest(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
             const email = req.body.email
-            const athlete = await User.findOne({ email })
-            if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404, { reason: email }))
-            athlete.pending.push(req.coach._id)
-            req.coach.pending.push(athlete._id)
-            await athlete.save()
+            const user = await User.findOne({ email })
+            if (!user) return next(new NotFoundException(ErrorMessages.USER_404, { reason: email }))
+            user.pending.push(req.coach._id)
+            req.coach.pending.push(user._id)
+            await user.save()
             await req.coach.save()
             res.status(201).send({ message: "Request sent." })
         } catch (e) {
@@ -201,7 +217,7 @@ export class CoachController {
         }
     }
 
-    public async removeAthleteConnection(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    public async removeConnection(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
             if (!req.params.id) return res.status(400).send({ message: 'ID not provided.' })
             if (!req.coach.athletes.includes(req.params.id)) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Not connected.' }))
