@@ -11,15 +11,15 @@ import { HttpException } from "../exceptions/httpExceptions";
 import { NotFoundException } from "../exceptions/notFoundException";
 import { BadRequestException } from "../exceptions/badRequestException";
 import { ErrorMessages } from "../constants/errorMessages";
-import { EmailService } from "../email/email";
+// import { EmailService } from "../email/email";
 
 export class AthleteController {
 
     private readonly allowedUpdates: string[]
-    private emailService: EmailService
+    // private emailService: EmailService
 
     constructor() {
-        this.emailService = new EmailService()
+        // this.emailService = new EmailService()
         this.allowedUpdates = ['firstName', 'lastName', 'password', 'dateOfBirth', 'sport']
         this.createAthlete = this.createAthlete.bind(this)
         this.loginAthlete = this.loginAthlete.bind(this)
@@ -41,11 +41,11 @@ export class AthleteController {
         const athlete = new Athlete(req.body)
         try {
             const token: string = await athlete.generateToken()
-            this.emailService.sendConfirmationEmail(
-                req.body.firstName,
-                req.body.email,
-                `http://127.0.0.1:3001/confirmation/${token}`
-            )
+            // this.emailService.sendConfirmationEmail(
+            //     req.body.firstName,
+            //     req.body.email,
+            //     `http://127.0.0.1:3001/confirmation/${token}`
+            // )
             await athlete.save()
             res.status(201).send({ athlete, token })
         } catch (e) {

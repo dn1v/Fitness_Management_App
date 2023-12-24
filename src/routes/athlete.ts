@@ -16,9 +16,9 @@ export class AthleteRouter extends AppRouter {
         return super.registerRoutes()
             // Athlete Management
             .post(Endpoints.ATHLETES, Auth.signupCheck.bind(Roles.ATHLETE), this.controller.createAthlete)
-            .post(Endpoints.ATHLETES_LOGIN, Auth.loginRoleCheck.bind(Roles.ATHLETE), this.controller.loginAthlete)
-            .post(Endpoints.ATHLETES_LOGOUT, Auth.authenticate, this.controller.logoutAthlete)
-            .post(Endpoints.ATHLETES_LOGOUTALL, Auth.authenticate, this.controller.logoutAll)
+            .post(Endpoints.LOGIN, Auth.loginRoleCheck.bind(Roles.ATHLETE), this.controller.loginAthlete)
+            .post(Endpoints.LOGOUT, Auth.authenticate, this.controller.logoutAthlete)
+            .post(Endpoints.LOGOUTALL, Auth.authenticate, this.controller.logoutAll)
             .get(Endpoints.ATHLETES_ME, Auth.authenticate, this.controller.readAthlete)
             .patch(Endpoints.ATHLETES_ME, Auth.authenticate, this.controller.updateAthlete)
             .delete(Endpoints.ATHLETES_ME, Auth.authenticate, this.controller.deleteAthlete)

@@ -19,9 +19,9 @@ export class CoachRouter extends AppRouter {
         return super.registerRoutes()
             // Coach Management
             .post(Endpoints.COACHES, Auth.signupCheck.bind(Roles.COACH), this.controller.createCoach)
-            .post(Endpoints.COACHES_LOGIN, Auth.loginRoleCheck.bind(Roles.COACH), this.controller.loginCoach)
-            .post(Endpoints.COACHES_LOGOUT, Auth.authenticate, this.controller.logoutCoach)
-            .post(Endpoints.COACHES_LOGOUTALL, Auth.authenticate, this.controller.logoutAll)
+            .post(Endpoints.LOGIN, Auth.loginRoleCheck.bind(Roles.COACH), this.controller.loginCoach)
+            .post(Endpoints.LOGOUT, Auth.authenticate, this.controller.logoutCoach)
+            .post(Endpoints.LOGOUTALL, Auth.authenticate, this.controller.logoutAll)
             .get(Endpoints.COACHES_ME, Auth.authenticate, this.controller.readCoach)
             .patch(Endpoints.COACHES_ME, Auth.authenticate, this.controller.updateCoach)
             .delete(Endpoints.COACHES_ME, Auth.authenticate, this.controller.deleteCoach)
