@@ -1,5 +1,4 @@
 import { ObjectId } from "mongoose";
-import { Role } from "../@types/user";
 
 export interface IUser extends Document {
     _id: ObjectId
@@ -7,8 +6,13 @@ export interface IUser extends Document {
     lastName: string;
     email: string;
     password: string;
-    role: Role
-    tokens: { token: string }[]
+    sentReqs?: ObjectId[];
+    receivedReqs?: ObjectId[];
+    coaches?: ObjectId[];
+    athletes?: ObjectId[];
+    connections?: ObjectId[];
+    pending?: ObjectId[];
+    tokens: { token: string }[];
     profilePhoto?: Buffer;
     generateToken(): Promise<string>;
     credentialsCheck(email: string, password: string): Promise<IUser | null>;

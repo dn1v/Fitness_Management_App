@@ -3,8 +3,6 @@ import validator from "validator";
 import jsonwebtoken from 'jsonwebtoken'
 import * as bcrypt from 'bcryptjs'
 import { IUser } from "../interfaces/user.interface";
-import { NextFunction } from "express";
-import { UnauthorizedException } from "../exceptions/unauthorizedException";
 import { BadRequestException } from "../exceptions/badRequestException";
 import { NotFoundException } from "../exceptions/notFoundException";
 import { ErrorMessages } from "../constants/errorMessages";
@@ -37,11 +35,30 @@ const userSchema: Schema<IUser> = new Schema({
         required: true,
         minLength: 7,
     },
-    role: {
-        type: String,
-        enum: ['athlete', 'coach'],
-        required: true,
-    },
+    sentReqs: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    receivedReqs: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    connections: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    coaches: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Coach'
+    }],
+    athletes: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Athlete'
+    }],
+    pending: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     tokens: [
         {
             token: {
@@ -89,8 +106,7 @@ userSchema.methods.toJSON = function () {
     delete user.password
     delete user.tokens
     delete user.profilePhoto
-    delete user.coaches
-    delete user.athletes
+
     return user
 }
 

@@ -112,7 +112,7 @@ export class SessionRPEController {
         try {
             const sRPE = await SessionRPE.findOne({ _id: req.params.id, owner: req.athlete._id })
             console.log(sRPE)
-            if (!sRPE) return res.sendStatus(404)
+            if (!sRPE) return next(new NotFoundException(ErrorMessages.SESSION_RPE_404))
             res.send(sRPE)
         } catch (e) {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
@@ -128,7 +128,6 @@ export class SessionRPEController {
                 { reason: 'Invalid fields in the request' }
             ))
         }
-
         try {
             console.log("SessionRPE id:", req.params.id)
             const sRPE = await SessionRPE.findOne({ _id: req.params.id, owner: req.athlete._id })
@@ -158,7 +157,7 @@ export class SessionRPEController {
                 )
                 );
             }
-            await this.instantiateNotification(req, 'sRPE', 'deleted sRPE.').save()
+            await this.instantiateNotification(req, 'sRPE', 'deleted sRPE').save()
             res.send(sRPE)
         } catch (e) {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
@@ -195,7 +194,7 @@ export class SessionRPEController {
     private instantiateSessionRPE(req: Request): typeof SessionRPE | null {
         return new SessionRPE({
             ...req.body,
-            owner: req.athlete._id
+            owner: req.user._id
         })
     }
 
@@ -208,9 +207,8 @@ export class SessionRPEController {
      */
     private instantiateNotification(req: Request, model: string, message: string) {
         return new Notification({
-            recipient: req.athlete.coaches,
-            initiatorId: req.athlete._id,
-            recipientId: req.athlete.coaches,
+            initiatorId: req.user._id,
+            recipientId: req.user.coaches,
             model,
             message: `${req.athlete.firstName} ${req.athlete.lastName} ${message}.`,
         })

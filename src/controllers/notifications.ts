@@ -14,14 +14,8 @@ export class NotificationController {
 
     public async readNotifications(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            if (req.athlete) {
-                let notifications = await this.findNotifications(req, 'athlete')
-                return res.send({ notifications })
-            }
-            if (req.coach) {
-                let notifications = await this.findNotifications(req, 'coach')
-                return res.send({ notifications })
-            }
+            let notifications = await Notification.find({ recipientId: { $in: [req.user._id] } })
+            return res.send({ notifications })
         } catch (e) {
             console.error(e)
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
@@ -30,8 +24,7 @@ export class NotificationController {
 
     public async deleteNotifications(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            if (req.athlete) await this.delete(req, 'athlete')
-            if (req.coach) await this.delete(req, 'coach')
+            await Notification.deleteMany({ recipientId: { $in: [req.user._id] } })
             return res.send({ message: 'Notifications deleted' })
         } catch (e) {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
@@ -55,19 +48,5 @@ export class NotificationController {
             console.error(e)
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
-    }
-
-    /**
-     * Fetches notifications based on a specific field of the request object.
-     * @param req - The Express request object.
-     * @param field - The field name to extract data from the request object.
-     * @returns A promise that resolves to notifications filtered by the recipient's ID in the specified field.
-     */
-    private async findNotifications(req: Request, field: keyof Request) {
-        return await Notification.find({ recipientId: { $in: [req[field]._id] } })
-    }
-
-    private async delete(req: Request, field: keyof Request) {
-        return await Notification.deleteMany({ recipientId: { $in: [req[field]._id] } })
     }
 }

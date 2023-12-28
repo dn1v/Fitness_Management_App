@@ -3,6 +3,7 @@ import { AppRouter } from "./appRouter";
 import { POMSController } from "../controllers/POMS";
 import { Endpoints } from "../constants/endpoints";
 import { Auth } from "../middlewares/auth";
+import { Roles } from "../constants/roles";
 
 export class POMSRouter extends AppRouter {
     controller: POMSController
@@ -14,14 +15,14 @@ export class POMSRouter extends AppRouter {
     registerRoutes(): Router {
         return super.registerRoutes()
             // POMS management (athlete)
-            .post(Endpoints.POMS, Auth.authenticate, this.controller.createPOMS)
-            .get(Endpoints.POMS, Auth.authenticate, this.controller.readManyPOMS)
-            .get(Endpoints.POMS_ID, Auth.authenticate, this.controller.readPOMS)
-            .patch(Endpoints.POMS_ID, Auth.authenticate, this.controller.updatePOMS)
-            .delete(Endpoints.POMS_ID, Auth.authenticate, this.controller.deletePOMS)
+            .post(Endpoints.POMS, Auth.authenticate, Auth.authorization.bind(Roles.ATHLETE), this.controller.createPOMS)
+            .get(Endpoints.POMS, Auth.authenticate, Auth.authorization.bind(Roles.ATHLETE), this.controller.readManyPOMS)
+            .get(Endpoints.POMS_ID, Auth.authenticate, Auth.authorization.bind(Roles.ATHLETE), this.controller.readPOMS)
+            .patch(Endpoints.POMS_ID, Auth.authenticate, Auth.authorization.bind(Roles.ATHLETE), this.controller.updatePOMS)
+            .delete(Endpoints.POMS_ID, Auth.authenticate, Auth.authorization.bind(Roles.ATHLETE), this.controller.deletePOMS)
 
             // POMS management (coach)
-            .post(Endpoints.POMS_COACH_AID, Auth.authenticate, this.controller.coachReadManyPOMS)
-            .post(Endpoints.POMS_COACH_AID, Auth.authenticate, this.controller.coachReadPOMS)
+            .post(Endpoints.POMS_COACH_AID, Auth.authenticate, Auth.authorization.bind(Roles.COACH), this.controller.coachReadManyPOMS)
+            .post(Endpoints.POMS_COACH_AID, Auth.authenticate, Auth.authorization.bind(Roles.COACH), this.controller.coachReadPOMS)
     }
 }

@@ -6,27 +6,9 @@ const athleteSchema: Schema<IAthlete> = new Schema({
     dateOfBirth: {
         type: Date,
     },
-    role: {
-        type: String,
-        required: true,
-        default: 'Athlete',
-        validate(value: string) {
-            if (value !== 'Athlete') {
-                throw new Error("Role property must be 'athlete'.")
-            }
-        }
-    },
     sport: {
         type: String,
-    },
-    coaches: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Coach'
-    }],
-    pending: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Coach'
-    }]
+    }
 }, {
     timestamps: true
 })
@@ -42,11 +24,5 @@ athleteSchema.virtual('pomsQ', {
     localField: '_id',
     foreignField: 'owner'
 })
-
-// athleteSchema.methods.toJSON = function () {
-//     const user = this.toObject()
-//     delete user.coaches
-//     return user
-// }
 
 export const Athlete = User.discriminator<IAthlete>("Athlete", athleteSchema)

@@ -6,6 +6,7 @@ import { User } from '../models/user'
 import { UnauthorizedException } from '../exceptions/unauthorizedException'
 import { ErrorMessages } from '../constants/errorMessages'
 import { BadRequestException } from '../exceptions/badRequestException'
+import { ForbiddenException } from '../exceptions/forbiddenException'
 
 export class Auth {
 
@@ -16,8 +17,7 @@ export class Auth {
             const decoded = await jsonwebtoken.verify(token, process.env.JWT_SECRET as Secret) as DecodedToken
             console.log(decoded)
             const user = await User.findOne({ _id: decoded._id, 'tokens.token': token }).exec()
-            if (user.__t === 'Coach') req.coach = user
-            if (user.__t === 'Athlete') req.athlete = user
+            req.user = user
             req.token = token
             next()
         } catch (e) {
@@ -33,23 +33,20 @@ export class Auth {
         if (req.body.role !== 'Coach' && req.body.role !== 'Athlete') {
             return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Role: ' + req.body.role }))
         }
-
-        if (req.body.role === this) {
-            next()
-        }
+        next()
     }
 
-    static async loginRoleCheck(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    static async authorization(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            console.log('test')
-            const user = await User.credentialsCheck(req.body.email, req.body.password)
-            console.log(user)
-            if (user.__t === 'Athlete') req.athlete = user
-            if (user.__t === 'Coach') req.coach = user
-
+            if (req.user.__t !== this) {
+                return next(new ForbiddenException(
+                    ErrorMessages.FORBIDDEN, 
+                    { reason: 'Role: ' + req.user.__t }
+                ))
+            }
             next()
-        } catch (error) {
-            next(error)
+        } catch (e) {
+            next(e)   
         }
-    }
+   }
 }

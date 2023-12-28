@@ -37,7 +37,7 @@ export class POMSController {
         }
         const poms = new POMS({
             ...req.body,
-            owner: req.athlete._id
+            owner: req.user._id
         })
 
         try {
@@ -50,12 +50,12 @@ export class POMSController {
 
     public async readManyPOMS(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            await req.athlete.populate({
+            await req.user.populate({
                 path: "pomsQ",
                 match: req.match,
                 options: req.options
             })
-            res.send({ POMS: req.athlete.pomsQ })
+            res.send({ POMS: req.user.pomsQ })
         } catch (e) {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
@@ -63,7 +63,7 @@ export class POMSController {
 
     public async readPOMS(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            const poms = await POMS.findOne({ _id: req.params.id, owner: req.athlete._id })
+            const poms = await POMS.findOne({ _id: req.params.id, owner: req.user._id })
             if (!poms) return next(new NotFoundException(ErrorMessages.POMS_404))
             res.send(poms)
         } catch (e) {
@@ -81,7 +81,7 @@ export class POMSController {
             }
             const athlete = await Athlete.findOne({ _id: req.params.aid })
             if (!athlete) return next(new NotFoundException(ErrorMessages.USER_404))
-            if (!athlete.coaches.includes(req.coach._id)) {
+            if (!athlete.coaches.includes(req.user._id)) {
                 return next(new NotFoundException(
                     ErrorMessages.USER_404,
                     { reason: "User is not on your coaching list." }
@@ -132,7 +132,7 @@ export class POMSController {
             ))
         }
         try {
-            const poms = await POMS.findOne({ _id: req.params.id, owner: req.athlete._id })
+            const poms = await POMS.findOne({ _id: req.params.id, owner: req.user._id })
             if (!poms) return next(new NotFoundException(ErrorMessages.POMS_404))
             updates.forEach((update: string) => poms[update] = req.body[update])
             await poms.save()
@@ -144,7 +144,7 @@ export class POMSController {
 
     public async deletePOMS(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            const poms = await POMS.findOneAndDelete({ _id: req.params.id, owner: req.athlete._id })
+            const poms = await POMS.findOneAndDelete({ _id: req.params.id, owner: req.user._id })
             if (!poms) return next(new NotFoundException(ErrorMessages.POMS_404))
             res.send(poms)
         } catch (e) {

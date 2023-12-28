@@ -5,5 +5,6 @@ export enum ErrorMessages {
     INTERNAL_SERVER_ERROR = 'Oops! Something went wrong. Please try again later.',
     POMS_404 = 'POMS questionnaire not found. Please review your inputs.',
     SESSION_RPE_404 = 'Session RPE not found. Please review your inputs.',
-    NOTIFICATION_404 = 'Notification not found. Please review your inputs.'
+    NOTIFICATION_404 = 'Notification not found. Please review your inputs.',
+    FORBIDDEN = 'Access forbidden. You do not have permission to access this resource.'
 }
