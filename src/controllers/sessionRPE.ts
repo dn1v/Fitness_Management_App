@@ -6,7 +6,6 @@ import { BadRequestException } from "../exceptions/badRequestException";
 import { ErrorMessages } from "../constants/errorMessages";
 import { HttpException } from "../exceptions/httpExceptions";
 import { NotFoundException } from "../exceptions/notFoundException";
-import { ISessionRPE } from "../interfaces/sRPE.interface";
 
 export class SessionRPEController {
 
