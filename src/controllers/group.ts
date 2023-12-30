@@ -6,6 +6,7 @@ import { HttpException } from "../exceptions/httpExceptions";
 import { NotFoundException } from "../exceptions/notFoundException";
 import { ForbiddenException } from "../exceptions/forbiddenException";
 import { User } from "../models/user";
+import { getOutputFileNames } from "typescript";
 
 export class GroupController {
 
@@ -165,20 +166,38 @@ export class GroupController {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
-    
-    public async addModerators() {}
 
-    public async removeModerator() {}
+    public async addModerators() { }
 
-    public async removeMerators() {}
+    public async removeModerator(req: Request, res: Response, next: NextFunction): Promise<void> {
+        const { groupId, modId } = req.params
 
-    public async addMember() {}
+        if (!groupId) {
+            return next(new BadRequestException(
+                ErrorMessages.BAD_REQUEST,
+                { reason: 'ID missing.' }
+            ))
+        }
+        try {
+            const moderator = await User.findOne({ _id: modId})
+            if (!moderator) {
+                return next(new NotFoundException(ErrorMessages.USER_404))
+            }
+            if
+        } catch (e) {
 
-    public async addMembers() {}
+        }
+    }
 
-    public async leaveGroup() {}
+    public async removeMerators() { }
 
-    
+    public async addMember() { }
+
+    public async addMembers() { }
+
+    public async leaveGroup() { }
+
+
 
     /**
     * Checks if the provided fields are allowed for updates.
