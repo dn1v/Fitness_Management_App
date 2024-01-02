@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty, IsOptional, IsDateString } from "class-validator";
+import { IsString, IsEmail, IsNotEmpty, IsOptional, IsDateString, minLength, MinLength } from "class-validator";
 
 export class UserSignupDto {
     @IsString()
@@ -14,28 +14,28 @@ export class UserSignupDto {
     email: string;
 
     @IsString()
-    @IsNotEmpty()
+    @MinLength(7)
     password: string
 
-    @IsString()
-    @IsOptional()
-    position?: string;
+    // @IsString()
+    // @IsOptional()
+    // position?: string;
 
-    @IsString()
-    @IsOptional()
-    sport?: string;
+    // @IsString()
+    // @IsOptional()
+    // sport?: string;
 
-    @IsDateString()
-    @IsOptional()
-    dateOfBirth?: Date;
+    // @IsDateString()
+    // @IsOptional()
+    // dateOfBirth?: Date;
 
-    constructor(userData: Partial<UserSignupDto>) {
+    constructor(userData: UserSignupDto) {
         this.firstName = userData.firstName || '';
         this.lastName = userData.lastName || '';
         this.email = userData.email || '';
         this.password = userData.password || '';
-        this.position = userData.position || '';
-        this.sport = userData.sport || '';
-        this.dateOfBirth = userData.dateOfBirth || undefined;
+        // this.position = userData.position || '';
+        // this.sport = userData.sport || '';
+        // this.dateOfBirth = userData.dateOfBirth || undefined;
     }
 }

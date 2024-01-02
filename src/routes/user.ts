@@ -4,6 +4,9 @@ import { Auth } from "../middlewares/auth";
 import { AppRouter } from "./appRouter";
 import { Roles } from "../constants/roles";
 import { UserController } from "../controllers/user";
+import { Validation } from "../middlewares/validation";
+import { UserSignupDto } from "../dto/user/signup.dto";
+import { UserLoginDto } from "../dto/user/login.dto";
 
 export class UserRouter extends AppRouter {
     controller: UserController
@@ -15,8 +18,8 @@ export class UserRouter extends AppRouter {
     registerRoutes(): Router {
         return super.registerRoutes()
             // Athlete Management
-            .post(Endpoints.USERS, this.controller.signup)
-            .post(Endpoints.USERS_LOGIN, this.controller.login)
+            .post(Endpoints.USERS, Auth.signupCheck, Validation.validateDto(UserSignupDto), this.controller.signup)
+            .post(Endpoints.USERS_LOGIN, Validation.validateDto(UserLoginDto), this.controller.login)
             .post(Endpoints.USERS_LOGOUT, Auth.authenticate, this.controller.logout)
             .post(Endpoints.USERS_LOGOUTALL, Auth.authenticate, this.controller.logoutAll)
             .get(Endpoints.USERS_ME, Auth.authenticate, this.controller.read)

@@ -55,8 +55,9 @@ export class App {
 
     private errorHandler(): void {
         this.app.use((err: HttpException<any>, req: Request, res: Response, next: NextFunction): void => {
-            const { status = 500, message = ErrorMessages.INTERNAL_SERVER_ERROR, data } = err;
-            res.status(status).send({ error: { message, data } })
+            const { status = 500, message = ErrorMessages.INTERNAL_SERVER_ERROR, data, name } = err;
+            res.status(status).send({ error: { status, message, data, name } })
+            console.error(err)
         })
     }
 
@@ -64,7 +65,7 @@ export class App {
         new Database()
     }
 
-    private routes(): void {        
+    private routes(): void {
         this.routers.forEach((router: AppRouter) => this.app.use(router.registerRoutes()))
     }
 }

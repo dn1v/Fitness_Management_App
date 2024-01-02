@@ -12,5 +12,4 @@ export class UserLoginDto {
         this.email = userData.email
         this.password = userData.password
     }
-
 }

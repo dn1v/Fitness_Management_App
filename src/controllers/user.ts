@@ -37,6 +37,7 @@ export class UserController {
             console.log(user)
             res.status(201).send({ user, token })
         } catch (e) {
+            console.error(e)
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
