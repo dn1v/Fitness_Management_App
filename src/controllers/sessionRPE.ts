@@ -209,7 +209,7 @@ export class SessionRPEController {
             initiatorId: req.user._id,
             recipientId: req.user.coaches,
             model,
-            message: `${req.athlete.firstName} ${req.athlete.lastName} ${message}.`,
+            message: `${req.user.firstName} ${req.user.lastName} ${message}.`,
         })
     }
 }

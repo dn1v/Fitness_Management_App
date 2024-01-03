@@ -14,7 +14,7 @@ export class Validation {
                 }
                 // I had a problem with plainToInstance
                 const errors = await validate(new type(req.body), {
-                    skipMissingProperties: false,
+                    skipMissingProperties,
                     forbidUnknownValues: true
                 });
 

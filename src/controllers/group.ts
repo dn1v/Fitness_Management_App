@@ -6,7 +6,7 @@ import { HttpException } from "../exceptions/httpExceptions";
 import { NotFoundException } from "../exceptions/notFoundException";
 import { ForbiddenException } from "../exceptions/forbiddenException";
 import { User } from "../models/user";
-import { getOutputFileNames } from "typescript";
+import { ObjectId } from "mongoose";
 
 export class GroupController {
 
@@ -117,18 +117,25 @@ export class GroupController {
     }
 
     public async deleteGroup(req: Request, res: Response, next: NextFunction): Promise<void> {
-        const { gruopId } = req.params
-        if (!gruopId) {
+        const { groupId } = req.params
+        if (!groupId) {
             return next(new BadRequestException(
                 ErrorMessages.BAD_REQUEST,
                 { reason: 'Gruop ID not provided.' }
             ))
         }
         try {
-            const group = await Group.findOneAndDelete({ _id: gruopId })
+            const group = await Group.findOne({ _id: groupId })
             if (!group) {
                 return next(new NotFoundException(ErrorMessages.GROUP_404))
             }
+            if (group.admin !== req.user._id) {
+                return next(new ForbiddenException(
+                    ErrorMessages.FORBIDDEN,
+                    { reason: "You are not admin of this gruop." }
+                ))
+            }
+            await Group.deleteOne({ _id: groupId })
             res.send({ message: 'Group deleted.' })
         } catch (e) {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
@@ -178,20 +185,69 @@ export class GroupController {
                 { reason: 'ID missing.' }
             ))
         }
-        try {
-            const moderator = await User.findOne({ _id: modId})
+            try {
+            const group = await Group.findOne({ _id: groupId })
+            if (!group) {
+                return next(new NotFoundException(ErrorMessages.GROUP_404))
+            }
+            if (group.admin !== req.user._id) {
+                return next(new ForbiddenException(
+                    ErrorMessages.FORBIDDEN,
+                    { reason: "You are not admin of this gruop." }
+                ))
+            }
+            const moderator: typeof User = await User.findOne({ _id: modId })
             if (!moderator) {
                 return next(new NotFoundException(ErrorMessages.USER_404))
             }
-            if
-        } catch (e) {
+            if (!group.moderators.includes(moderator._id)) {
+                return next(new NotFoundException(
+                    ErrorMessages.USER_404,
+                    { reason: "User not on the moderators list." }
+                ))
 
+            }
+            group.moderators = group.moderators.filter((mod: ObjectId) => mod.toString() !== moderator._id.toString())
+            await group.save()
+            res.send({ group })
+        } catch (e) {
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
     public async removeMerators() { }
 
-    public async addMember() { }
+    public async addMember(req: Request, res: Response, next: NextFunction) {
+        const { groupId, newMemberId } = req.params
+
+        if (!groupId) {
+            return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'ID missing.' }))
+        }
+        try {
+            const group = await Group.findOne({ _id: groupId })
+            if (!group) {
+                return next(new NotFoundException(ErrorMessages.GROUP_404))
+            }
+            if (req.user._id !== group.admin) {
+                return next(new ForbiddenException(
+                    ErrorMessages.FORBIDDEN,
+                    { reason: "You are not admin of this group." }
+                ))
+            }
+            const newMember = await User.findOne({ _id: newMemberId })
+            if (!newMember) {
+                return next(new NotFoundException(
+                    ErrorMessages.USER_404,
+                    { reason: 'User you want to add as a member does not exist.' }
+                ))
+            }
+            group.moderators.push(newMemberId)
+            await group.save()
+            res.send({ group })
+        } catch (e) {
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
 
     public async addMembers() { }
 
