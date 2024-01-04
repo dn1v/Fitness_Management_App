@@ -13,6 +13,7 @@ export class Auth {
     static async authenticate(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
             const token = req.header('Authorization')?.replace('Bearer ', '')
+            console.log('TOKEN HERE:', token)
             if (token === undefined) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Token not provided.' }))
             const decoded = await jsonwebtoken.verify(token, process.env.JWT_SECRET as Secret) as DecodedToken
             console.log(decoded)

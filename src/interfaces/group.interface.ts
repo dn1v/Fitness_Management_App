@@ -6,6 +6,7 @@ export interface IGroup extends Document {
     moderators: ObjectId[]
     members: ObjectId[]
     posts: ObjectId[]
+    groupName: string
     about: string
     showMembers: boolean
     showModerators: boolean

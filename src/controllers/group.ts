@@ -28,21 +28,26 @@ export class GroupController {
                 { reason: 'Invalid fields in the request' }
             ))
         }
-        const group = new Group({ ...req.body })
+
+        const group = new Group({ ...req.body, admin: req.user._id })
         try {
             await group.save()
             res.status(201).send({ group })
         } catch (e) {
+            console.error(e)
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
     public async readGroups(req: Request, res: Response, next: NextFunction): Promise<void> {
         const { _id: admin } = req.user
+        console.log(admin)
         try {
-            const groups = Group.find({ admin })
+
+            const groups = await Group.find({ admin })
             res.send({ groups })
         } catch (e) {
+            console.error(e)
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
@@ -70,7 +75,6 @@ export class GroupController {
     public async updateGroup(req: Request, res: Response, next: NextFunction): Promise<void> {
         const fields = Object.keys(req.body)
         const { groupId } = req.params
-        const { _id: userId } = req.user
         if (!this.fieldsCheck(fields, this.allowedUpdates)) {
             return next(new BadRequestException(
                 ErrorMessages.BAD_REQUEST,
@@ -85,7 +89,8 @@ export class GroupController {
         }
         try {
             const group = await Group.findOne({ _id: groupId })
-
+            console.log('user: ', req.user._id)
+            console.log('admin:', group.admin)
             if (!group) {
                 return next(new NotFoundException(
                     ErrorMessages.GROUP_404,
@@ -93,7 +98,7 @@ export class GroupController {
                 ))
             }
             // this.userAdminError(userId, group, next)
-            if (userId !== group.admin) {
+            if (req.user._id.toString() !== group.admin.toString()) {
                 return next(new ForbiddenException(
                     ErrorMessages.FORBIDDEN,
                     { reason: "You are not admin of this gruop." }
@@ -129,7 +134,7 @@ export class GroupController {
             if (!group) {
                 return next(new NotFoundException(ErrorMessages.GROUP_404))
             }
-            if (group.admin !== req.user._id) {
+            if (req.user._id.toString() !== group.admin.toString()) {
                 return next(new ForbiddenException(
                     ErrorMessages.FORBIDDEN,
                     { reason: "You are not admin of this gruop." }
@@ -143,7 +148,7 @@ export class GroupController {
     }
 
     public async addModerator(req: Request, res: Response, next: NextFunction): Promise<void> {
-        const { groupId, newModId } = req.params
+        const { groupId, newModId: modId } = req.params
 
         if (!groupId) {
             return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'ID missing.' }))
@@ -153,20 +158,20 @@ export class GroupController {
             if (!group) {
                 return next(new NotFoundException(ErrorMessages.GROUP_404))
             }
-            if (req.user._id !== group.admin) {
+            if (req.user._id.toString() !== group.admin.toString()) {
                 return next(new ForbiddenException(
                     ErrorMessages.FORBIDDEN,
                     { reason: "You are not admin of this gruop." }
                 ))
             }
-            const newMod = await User.findOne({ _id: newModId })
+            const newMod = await User.findOne({ _id: modId })
             if (!newMod) {
                 return next(new NotFoundException(
                     ErrorMessages.USER_404,
                     { reason: 'User you want to add as a moderator does not exist.' }
                 ))
             }
-            group.moderators.push(newModId)
+            group.moderators.push(modId)
             await group.save()
             res.send({ group })
         } catch (e) {
@@ -185,12 +190,12 @@ export class GroupController {
                 { reason: 'ID missing.' }
             ))
         }
-            try {
+        try {
             const group = await Group.findOne({ _id: groupId })
             if (!group) {
                 return next(new NotFoundException(ErrorMessages.GROUP_404))
             }
-            if (group.admin !== req.user._id) {
+            if (req.user._id.toString() !== group.admin.toString()) {
                 return next(new ForbiddenException(
                     ErrorMessages.FORBIDDEN,
                     { reason: "You are not admin of this gruop." }
@@ -215,10 +220,10 @@ export class GroupController {
         }
     }
 
-    public async removeMerators() { }
+    public async removeModerators() { }
 
     public async addMember(req: Request, res: Response, next: NextFunction) {
-        const { groupId, newMemberId } = req.params
+        const { groupId, memberId } = req.params
 
         if (!groupId) {
             return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'ID missing.' }))
@@ -228,20 +233,20 @@ export class GroupController {
             if (!group) {
                 return next(new NotFoundException(ErrorMessages.GROUP_404))
             }
-            if (req.user._id !== group.admin) {
+            if (req.user._id.toString() !== group.admin.toString()) {
                 return next(new ForbiddenException(
                     ErrorMessages.FORBIDDEN,
-                    { reason: "You are not admin of this group." }
+                    { reason: "You are not admin of this gruop." }
                 ))
             }
-            const newMember = await User.findOne({ _id: newMemberId })
+            const newMember = await User.findOne({ _id: memberId })
             if (!newMember) {
                 return next(new NotFoundException(
                     ErrorMessages.USER_404,
                     { reason: 'User you want to add as a member does not exist.' }
                 ))
             }
-            group.moderators.push(newMemberId)
+            group.moderators.push(memberId)
             await group.save()
             res.send({ group })
         } catch (e) {

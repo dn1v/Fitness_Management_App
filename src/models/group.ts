@@ -18,6 +18,11 @@ const groupSchema: Schema<IGroup> = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Post'
     }],
+    groupName: {
+        type: String,
+        trim: true,
+        required: true,
+    },
     about: {
         type: String,
         trim: true,

@@ -12,10 +12,11 @@ export class Validation {
                 if (!req.body) {
                     return next(new BadRequestException(ErrorMessages.BAD_REQUEST))
                 }
+               
                 // I had a problem with plainToInstance
                 const errors = await validate(new type(req.body), {
                     skipMissingProperties,
-                    forbidUnknownValues: true
+                    forbidUnknownValues: true, 
                 });
 
                 if (errors.length > 0) {
