@@ -22,6 +22,16 @@ const postSchema: Schema<IPost> = new Schema({
         type: String,
         required: true
     },
+    url: {
+        type: String,
+        trim: true
+    },
+    excelFile: {
+        type: Buffer
+    },
+    pdfFile: {
+        type: Buffer
+    },
     seen: [{
         type: Schema.Types.ObjectId,
         ref: 'User'

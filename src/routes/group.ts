@@ -56,17 +56,23 @@ export class GroupRouter extends AppRouter {
                 Auth.authorization.bind(Roles.COACH),
                 this.controller.addModerator
             )
-            .patch(
+            .delete(
                 Endpoints.GROUPS_ID_MEMBERS_MODID,
                 Auth.authenticate,
                 Auth.authorization.bind(Roles.COACH),
                 this.controller.removeModerator
             )
-            .patch(
+            .post(
                 Endpoints.GROUPS_ID_MEMBERS_MEMBERID,
                 Auth.authenticate,
                 Auth.authorization.bind(Roles.COACH),
                 this.controller.addMember
+            )
+            .delete(
+                Endpoints.GROUPS_ID_MEMBERS_MEMBERID,
+                Auth.authenticate,
+                Auth.authorization.bind(Roles.COACH),
+                this.controller.removeMember
             )
     }
 }

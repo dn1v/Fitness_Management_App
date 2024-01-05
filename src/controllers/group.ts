@@ -246,7 +246,52 @@ export class GroupController {
                     { reason: 'User you want to add as a member does not exist.' }
                 ))
             }
+            if (group.members.includes(newMember._id)) {
+                return next(new BadRequestException(
+                    ErrorMessages.BAD_REQUEST,
+                    { reason: "User is already a member of this group." }
+                ))
+            }
             group.moderators.push(memberId)
+            await group.save()
+            res.send({ group })
+        } catch (e) {
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
+
+    public async removeMember(req: Request, res: Response, next: NextFunction): Promise<void> {
+        const { groupId, memberId } = req.params
+
+        if (!groupId) {
+            return next(new BadRequestException(
+                ErrorMessages.BAD_REQUEST,
+                { reason: 'ID missing.' }
+            ))
+        }
+        try {
+            const group = await Group.findOne({ _id: groupId })
+            if (!group) {
+                return next(new NotFoundException(ErrorMessages.GROUP_404))
+            }
+            if (req.user._id.toString() !== group.admin.toString()) {
+                return next(new ForbiddenException(
+                    ErrorMessages.FORBIDDEN,
+                    { reason: "You are not admin of this gruop." }
+                ))
+            }
+            const member: typeof User = await User.findOne({ _id: memberId })
+            if (!member) {
+                return next(new NotFoundException(ErrorMessages.USER_404))
+            }
+            if (!group.members.includes(member._id)) {
+                return next(new NotFoundException(
+                    ErrorMessages.USER_404,
+                    { reason: "User not on the moderators list." }
+                ))
+
+            }
+            group.members = group.members.filter((mmbr: ObjectId) => mmbr.toString() !== member._id.toString())
             await group.save()
             res.send({ group })
         } catch (e) {
@@ -256,9 +301,39 @@ export class GroupController {
 
     public async addMembers() { }
 
-    public async leaveGroup() { }
+    public async leaveGroup(req: Request, res: Response, next: NextFunction): Promise<void> { 
+        const {groupId, memberId } = req.params
 
-
+        if ( !groupId || !memberId) {
+            return next(new BadRequestException(
+                ErrorMessages.BAD_REQUEST, 
+                { reason: 'Group or member ID does not exist.'}
+            ))
+        }
+        try {
+            const group = await Group.findOne({_id: groupId })
+            if (!group) {
+                return next(new NotFoundException(ErrorMessages.GROUP_404))
+            }
+            const member = await User.findOne({_id: memberId })
+            if (!member) {
+                return next(new NotFoundException(ErrorMessages.USER_404))
+            }
+            if (!group.members.includes(member._id) && group.moderators.includes(member._id)) {
+                return next(new BadRequestException(
+                    ErrorMessages.USER_404, 
+                    { reason: 'User is not part of this group.'}
+                ))
+            }
+            group.members = group.members.filter((mmbr: ObjectId) => mmbr.toString() !== member._id.toString())
+            group.moderators = group.moderators.filter((mmbr: ObjectId) => mmbr.toString() !== member._id.toString())
+            await group.save()
+            res.send({ group })
+        } catch (e) {
+            console.error(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
 
     /**
     * Checks if the provided fields are allowed for updates.

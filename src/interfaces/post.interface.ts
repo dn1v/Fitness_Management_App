@@ -7,6 +7,9 @@ export interface IPost extends Document {
     isGeneral: boolean
     title: string
     content: string
+    url: string
+    excelFile: Buffer
+    pdfFile: Buffer
     seen: ObjectId[]
     createdAt: Date
     updatedAt: Date
