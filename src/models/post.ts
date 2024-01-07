@@ -10,6 +10,10 @@ const postSchema: Schema<IPost> = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Group'
     }],
+    users: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     isGeneral: {
         type: Boolean,
         default: true
@@ -32,10 +36,6 @@ const postSchema: Schema<IPost> = new Schema({
     pdfFile: {
         type: Buffer
     },
-    seen: [{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    }],
 }, {
     timestamps: true
 })

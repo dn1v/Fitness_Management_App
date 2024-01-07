@@ -7,5 +7,6 @@ export enum ErrorMessages {
     SESSION_RPE_404 = 'Session RPE not found. Please review your inputs.',
     NOTIFICATION_404 = 'Notification not found. Please review your inputs.',
     FORBIDDEN = 'Access forbidden. You do not have permission to access this resource.',
-    GROUP_404 = 'Session RPE not found. Please review your inputs.'
+    GROUP_404 = 'Session RPE not found. Please review your inputs.',
+    POST_404 = 'Post not found. Please review your inputs.'
 }

@@ -29,7 +29,10 @@ export enum Endpoints {
     GROUPS_ID = '/groups/:groupId',
     GROUPS_ID_MEMBERS_MODID = '/groups/:groupId/members/:modId',
     GROUPS_ID_MEMBERS_MEMBERID = '/groups/:groupId/members/:memberId',
-    // GROUPS_ID_MEMBERS_ID = '/groups/:groupId/members/:modId'
 
+    POSTS = '/posts',
+    POSTS_GROUP_ID = '/posts/group/:groupId',
+    POSTS_GENERAL = '/posts/general',
+    POSTS_POSTID_GROUP_GROUPID = '/posts/:postId/group/:groupId'
 }
 
