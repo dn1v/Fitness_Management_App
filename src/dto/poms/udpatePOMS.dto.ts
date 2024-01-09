@@ -1,6 +1,7 @@
 import { IsOptional, IsNumber, IsString } from "class-validator";
+import { AbstractDto } from "../DTO.dto";
 
-export class UpdatePomsDto {
+export class UpdatePomsDto extends AbstractDto {
 
      @IsString()
      @IsOptional()
@@ -102,7 +103,10 @@ export class UpdatePomsDto {
      @IsOptional()
      lively: number;
 
+     allowedUpdates: string[]
+
     constructor(userData: UpdatePomsDto) {
+        super()
         this.owner = userData.owner;
         this.angry = userData.angry;
         this.annoyed = userData.annoyed;
@@ -128,5 +132,34 @@ export class UpdatePomsDto {
         this.alert = userData.alert;
         this.energetic = userData.energetic;
         this.lively = userData.lively;
+        this.allowedUpdates = ['owner',
+        'angry',
+        'annoyed',
+        'badTempered',
+        'bitter',
+        'confused',
+        'mixedUp',
+        'muddled',
+        'uncertain',
+        'depressed',
+        'downhearted',
+        'miserable',
+        'unhappy',
+        'exhausted',
+        'sleepy',
+        'tired',
+        'wornOut',
+        'anxious',
+        'nervous',
+        'panicky',
+        'worried',
+        'active',
+        'alert',
+        'energetic',
+        'lively']
+    }
+
+    getAllowedFields(): string[] {
+        return this.allowedUpdates
     }
 }
