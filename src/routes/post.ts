@@ -7,6 +7,7 @@ import { Roles } from "../constants/roles";
 import { Validation } from "../middlewares/validation";
 import { PostController } from "../controllers/post";
 import { CreatePostDto } from "../dto/post/createPost.dto";
+import { UpdatePostDto } from "../dto/post/updatePost.dto";
 
 export class PostRouter extends AppRouter {
     controller: PostController
@@ -39,6 +40,17 @@ export class PostRouter extends AppRouter {
                 Endpoints.POSTS_POSTID_GROUP_GROUPID,
                 Auth.authenticate,
                 this.controller.readGroupPost
+            )
+            .patch(
+                Endpoints.POST_POSTID,
+                Auth.authenticate,
+                //Validation.validateDto(UpdatePostDto),
+                this.controller.updatePost
+            )
+            .delete(
+                Endpoints.POST_POSTID,
+                Auth.authenticate,
+                this.controller.deletePost
             )
     }
 }

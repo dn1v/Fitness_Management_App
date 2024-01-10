@@ -1,7 +1,7 @@
 import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, isBoolean } from "class-validator";
-import { AbstractDto, DTO } from "../DTO.dto";
+import { AbstractDto } from "../DTO.dto";
 
-export class CreatePostDto extends AbstractDto {
+export class UpdatePostDto extends AbstractDto {
 
     @IsArray()
     @IsOptional()
@@ -29,7 +29,7 @@ export class CreatePostDto extends AbstractDto {
 
     allowedFields: string[]
 
-    constructor(userData: CreatePostDto) {
+    constructor(userData: UpdatePostDto) {
         super()
         this.groups = userData.groups
         this.isGeneral = true

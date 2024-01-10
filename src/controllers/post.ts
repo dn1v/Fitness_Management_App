@@ -6,11 +6,18 @@ import { HttpException } from "../exceptions/httpExceptions";
 import { NotFoundException } from "../exceptions/notFoundException";
 import { ForbiddenException } from "../exceptions/forbiddenException";
 import { User } from "../models/user";
-import { ObjectId } from "mongoose";
 import { Post } from "../models/post";
 import { Roles } from "../constants/roles";
+import { ObjectId } from 'mongodb'
 
 export class PostController {
+
+    constructor() {
+        this.updatePost = this.updatePost.bind(this)
+        this.deletePost = this.deletePost.bind(this)
+        this.readGroupPost = this.readGroupPost.bind(this)
+        this.readGroupPosts = this.readGroupPosts.bind(this)
+    }
 
     public async createPost(req: Request, res: Response, next: NextFunction): Promise<void> {
         const post = new Post({ authorId: req.user._id, ...req.body })
@@ -51,17 +58,6 @@ export class PostController {
         }
     }
 
-    private isAdOrMod(user: typeof User, next: NextFunction) {
-        if (user.__t !== Roles.COACH) {
-            next(new ForbiddenException(
-                ErrorMessages.FORBIDDEN,
-                { reason: "Role: " + user.__t }
-            ))
-            return true
-        }
-        return false
-    }
-
     public async readGeneralPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const posts = await Post.find({
@@ -76,12 +72,7 @@ export class PostController {
 
     public async readGroupPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
         const { groupId } = req.params
-        if (!groupId) {
-            return next(new BadRequestException(
-                ErrorMessages.BAD_REQUEST,
-                { reason: 'Group ID not provided.' }
-            ))
-        }
+        if (this.noGroupId(groupId, next)) return
         try {
             const group = await Group.findOne({ _id: groupId })
             if (!group) {
@@ -98,7 +89,7 @@ export class PostController {
 
     public async readGroupPost(req: Request, res: Response, next: NextFunction): Promise<void> {
         const { groupId, postId } = req.params
-        if (!groupId || !postId) {
+        if (!ObjectId.isValid(groupId) || !ObjectId.isValid(postId)) {
             return next(new BadRequestException(
                 ErrorMessages.BAD_REQUEST,
                 { reason: 'Group or post ID not provided.' }
@@ -107,12 +98,8 @@ export class PostController {
         try {
             const group = await Group.findOne({ _id: groupId })
             const post = await Post.findOne({ _id: postId })
-            if (!group) {
-                return next(new NotFoundException(ErrorMessages.GROUP_404))
-            }
-            if (!post) {
-                return next(new NotFoundException(ErrorMessages.GROUP_404))
-            }
+            if (this.noGroup(group, next)) return
+            if (this.noPost(post, next)) return
             if (!group.posts.includes(post._id)) {
                 return next(new BadRequestException(
                     ErrorMessages.BAD_REQUEST,
@@ -128,31 +115,81 @@ export class PostController {
 
     public async updatePost(req: Request, res: Response, next: NextFunction): Promise<void> {
         const { postId } = req.params
-
-        if (!postId) {
-            return next(new BadRequestException(
-                ErrorMessages.BAD_REQUEST,
-                { reason: "Post ID not provided." }
-            ))
-        }
+        const fields = Object.keys(req.body)
+        if (this.noPostId(postId, next)) return
         try {
             const post = await Post.findOne({ _id: postId })
-            if (!post) {
-                return next(new NotFoundException(ErrorMessages.POST_404))
-            }
-            if (req.user._id.toString() !== post.authorId.toString()) {
-                return next(new ForbiddenException(
-                    ErrorMessages.FORBIDDEN,
-                    { reason: 'You are not the author of this post.' }
-                ))
-            }
-            
+            if (this.noPost(post, next)) return
+            if (this.isForbidden(post, req.user, next)) return
+            fields.forEach((field: string) => post[field] = req.body[field])
+            await post.save()
+            res.send({ post })
         } catch (e) {
-
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
 
     public async deletePost(req: Request, res: Response, next: NextFunction): Promise<void> {
+        const { postId } = req.params
+        if (this.noPostId(postId, next)) return
+        try {
+            const post = await Post.findOne({ _id: postId })
+            if (this.noPost(post, next)) return
+            if (this.isForbidden(post, req.user, next)) return
+            await Post.deleteOne({ _id: postId })
+            res.send({ message: 'Post deleted.' })
+        } catch (e) {
+            console.error(e)
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
 
+    private noPost(post: typeof Post, next: NextFunction) {
+        if (!post) {
+            next(new NotFoundException(ErrorMessages.POST_404))
+            return true
+        }
+        return false
+    }
+
+    private noGroup(group: typeof Group, next: NextFunction) {
+        if (!group) {
+            next(new NotFoundException(ErrorMessages.GROUP_404))
+            return true
+        }
+        return false
+    }
+
+    private noPostId(postId: string, next: NextFunction) {
+        if (!postId || !ObjectId.isValid(postId)) {
+            next(new BadRequestException(
+                ErrorMessages.BAD_REQUEST,
+                { reason: "Post ID not provided or invalid." }
+            ))
+            return true
+        }
+        return false
+    }
+
+    private noGroupId(groupId: string, next: NextFunction) {
+        if (!groupId|| !ObjectId.isValid(groupId)) {
+            next(new BadRequestException(
+                ErrorMessages.BAD_REQUEST,
+                { reason: "Post ID not provided or invalid." }
+            ))
+            return true
+        }
+        return false
+    }
+
+    private isForbidden(post: typeof Post, user: typeof User, next: NextFunction) {
+        if (user._id.toString() !== post.authorId.toString()) {
+            next(new ForbiddenException(
+                ErrorMessages.FORBIDDEN,
+                { reason: 'You are not the author of this post.' }
+            ))
+            return true
+        }
+        return false
     }
 }

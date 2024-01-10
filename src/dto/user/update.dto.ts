@@ -1,6 +1,7 @@
 import { IsString, IsEmail, IsNotEmpty, IsOptional, IsDateString, minLength, MinLength } from "class-validator";
+import { AbstractDto } from "../DTO.dto";
 
-export class CoachUpdateDto {
+export class CoachUpdateDto extends AbstractDto {
 
     @IsString()
     @IsNotEmpty()
@@ -19,14 +20,19 @@ export class CoachUpdateDto {
     position?: string
 
     constructor(userData: CoachUpdateDto) {
+        super()
         this.firstName = userData.firstName
         this.lastName = userData.lastName
         this.password = userData.password
         this.position = userData.position
     }
+
+    getAllowedFields(): string[] {
+        return ['firstName', 'lastName', 'password', 'position']
+    }
 }
 
-export class AthleteUpdateDto {
+export class AthleteUpdateDto extends AbstractDto {
 
     @IsString()
     @IsOptional()
@@ -50,10 +56,15 @@ export class AthleteUpdateDto {
     sport?: string;
 
     constructor(userData: Partial<AthleteUpdateDto>) {
+        super()
         this.firstName = userData.firstName
         this.lastName = userData.lastName
         this.password = userData.password
         this.date = userData.date
         this.sport = userData.sport
+    }
+
+    getAllowedFields(): string[] {
+        return ['firstName', 'lastName', 'password', 'date', 'sport']
     }
 }
