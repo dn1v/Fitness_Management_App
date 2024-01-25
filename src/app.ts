@@ -6,6 +6,8 @@ import { ErrorMessages } from './constants/errorMessages'
 import http, { Server } from 'http'
 import { Server as SocketIOServer } from 'socket.io'
 import { AppRouter } from './routes/appRouter'
+import bodyParser from 'body-parser'
+import fileUpload from 'express-fileupload'
 
 export class App {
     private app: Express
@@ -42,7 +44,9 @@ export class App {
     }
 
     private middlewares(): void {
-        this.app.use(express.json())
+        this.app.use(bodyParser.json())
+        this.app.use(bodyParser.urlencoded({ extended: true }))
+        this.app.use(fileUpload())
         this.app.use(function (req: Request, res: Response, next: NextFunction) {
             res.header("Access-Control-Allow-Origin", process.env.CORS_URL);
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");

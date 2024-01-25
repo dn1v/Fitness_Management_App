@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { AppRouter } from "./appRouter";
-import { Post } from "../models/post";
 import { Endpoints } from "../constants/endpoints";
 import { Auth } from "../middlewares/auth";
 import { Roles } from "../constants/roles";
@@ -8,20 +7,23 @@ import { Validation } from "../middlewares/validation";
 import { PostController } from "../controllers/post";
 import { CreatePostDto } from "../dto/post/createPost.dto";
 import { UpdatePostDto } from "../dto/post/updatePost.dto";
+import multer, { Multer } from "multer";
 
 export class PostRouter extends AppRouter {
     controller: PostController
+    upload: Multer
     constructor() {
         super()
         this.controller = new PostController()
+        this.upload = multer()
     }
 
     registerRoutes(): Router {
         return super.registerRoutes()
             // PoST management (athlete)
             .post(
-                Endpoints.POSTS, 
-                Auth.authenticate, 
+                Endpoints.POSTS,
+                Auth.authenticate,
                 Auth.authorization.bind(Roles.COACH),
                 Validation.validateDto(CreatePostDto),
                 this.controller.createPost
@@ -44,7 +46,7 @@ export class PostRouter extends AppRouter {
             .patch(
                 Endpoints.POST_POSTID,
                 Auth.authenticate,
-                //Validation.validateDto(UpdatePostDto),
+                Validation.validateDto(UpdatePostDto),
                 this.controller.updatePost
             )
             .delete(

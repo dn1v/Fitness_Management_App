@@ -27,6 +27,9 @@ export class UpdatePostDto extends AbstractDto {
     @IsOptional()
     showMembers: boolean
 
+    @IsOptional()
+    excelFile: Buffer
+
     allowedFields: string[]
 
     constructor(userData: UpdatePostDto) {
@@ -37,8 +40,8 @@ export class UpdatePostDto extends AbstractDto {
         this.title = userData.title
         this.content = userData.content
         this.url = userData.url
-        this.url = userData.url
-        this.allowedFields = ['groups', 'isGeneral', 'title', 'content', 'url', 'showMembers']
+        this.excelFile = userData.excelFile
+        this.allowedFields = ['groups', 'excelFile', 'isGeneral', 'title', 'content', 'url', 'showMembers']
     }
 
     getAllowedFields(): string[] {

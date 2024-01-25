@@ -1,5 +1,16 @@
 import mongoose, { Schema } from "mongoose";
-import { IPost } from "../interfaces/post.interface";
+import { IExcelMetadata, IPost } from "../interfaces/post.interface";
+
+const excelFileMetadata: Schema<IExcelMetadata> = new Schema({
+    fileName: {
+        type: String,
+        required: true,
+    },
+    fileSize: {
+        type: Number,
+        required: true,
+    },
+})
 
 const postSchema: Schema<IPost> = new Schema({
     authorId: {
@@ -33,11 +44,21 @@ const postSchema: Schema<IPost> = new Schema({
     excelFile: {
         type: Buffer
     },
+    excelFileMetadata: {
+        type: excelFileMetadata
+    },
     pdfFile: {
         type: Buffer
     },
 }, {
     timestamps: true
 })
+
+postSchema.methods.toJSON = function () {
+    const post = this.toObject()
+    delete post.excelFile
+    delete post.pdfFile
+    return post
+}
 
 export const Post = mongoose.model<IPost>('Post', postSchema)

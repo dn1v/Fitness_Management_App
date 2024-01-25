@@ -1,5 +1,5 @@
 import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, isBoolean } from "class-validator";
-import { AbstractDto, DTO } from "../DTO.dto";
+import { AbstractDto } from "../DTO.dto";
 
 export class CreatePostDto extends AbstractDto {
 
@@ -27,6 +27,9 @@ export class CreatePostDto extends AbstractDto {
     @IsOptional()
     showMembers: boolean
 
+    @IsOptional()
+    excelFile: Buffer
+
     allowedFields: string[]
 
     constructor(userData: CreatePostDto) {
@@ -37,8 +40,8 @@ export class CreatePostDto extends AbstractDto {
         this.title = userData.title
         this.content = userData.content
         this.url = userData.url
-        this.url = userData.url
-        this.allowedFields = ['groups', 'isGeneral', 'title', 'content', 'url', 'showMembers']
+        this.excelFile = userData.excelFile
+        this.allowedFields = ['groups', 'isGeneral', 'title', 'content', 'url', 'showMembers', 'excelFile']
     }
 
     getAllowedFields(): string[] {

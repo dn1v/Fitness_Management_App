@@ -9,6 +9,7 @@ import { User } from "../models/user";
 import { Post } from "../models/post";
 import { Roles } from "../constants/roles";
 import { ObjectId } from 'mongodb'
+import ExcelJS from 'exceljs'
 
 export class PostController {
 
@@ -21,17 +22,47 @@ export class PostController {
 
     public async createPost(req: Request, res: Response, next: NextFunction): Promise<void> {
         const post = new Post({ authorId: req.user._id, ...req.body })
+        post.excelFile = req.file?.buffer.buffer
+        post.excelFileMetadata = { fileName: req.file?.originalname, fileSize: req.file?.size }
+        // const xlsxFile = Array.isArray(req.files?.excelFile)
+        //     ? req.files?.excelFile[0]  // Take the first file if it's an array
+        //     : req.files?.excelFile;
         try {
+            //addding excel file to excelFile field if valid
+            // if (xlsxFile) {
+            //     console.log(xlsxFile)
+            //     const workbook = new ExcelJS.Workbook()
+            //     await workbook.xlsx.load(xlsxFile.data)
+            //     if (workbook.worksheets.length === 0) {
+            //         return next(new BadRequestException(
+            //             ErrorMessages.BAD_REQUEST,
+            //             { reason: 'Invalid Excel file. It must contain at least one worksheet.' }
+            //         ))
+            //     }
+            //     post.excelFile = xlsxFile.data
+            //     post.excelFileMetadata = { fileName: xlsxFile.name, fileSize: xlsxFile.size }
+            // }
+
             const groupsToUpdate: string[] = []
+            // if the user selected groups where the post needs to be shared
             if (req.body.groups?.length) {
                 post.isGeneral = false
+                // Checking if provided id's are valid.
+                if (!req.body.groups.every((id: string) => ObjectId.isValid(id))) {
+                    return next(new BadRequestException(
+                        ErrorMessages.BAD_REQUEST,
+                        { reason: "Invalid ID." }
+                    ))
+                }
                 const groups = await Group.find({ _id: { $in: req.body.groups } })
+                // Checking if provided IDs are group IDs.
                 if (groups.length !== req.body.groups.length) {
                     return next(new BadRequestException(
                         ErrorMessages.BAD_REQUEST,
                         { reason: "One or more groups doesn't exist." }
                     ))
                 }
+                // Checking if the user creating the post is the admin or moderator of selected group
                 groups.forEach((group: typeof Group) => {
                     const isAdmin = group.admin.toString() === req.user._id.toString();
                     const isModerator = group.moderators.includes(req.user._id);
@@ -41,9 +72,11 @@ export class PostController {
                             { reason: "You don't have admin or moderator access for one or more specified groups." }
                         ))
                     }
+                    // will be used in updateMany; avoiding updating within a loop
                     groupsToUpdate.push(group._id)
                 });
             } else {
+                // if it's general post (for all connected users to see)
                 post.users = req.user.connections
             }
             await Group.updateMany(
@@ -57,6 +90,7 @@ export class PostController {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
+
 
     public async readGeneralPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
@@ -172,7 +206,7 @@ export class PostController {
     }
 
     private noGroupId(groupId: string, next: NextFunction) {
-        if (!groupId|| !ObjectId.isValid(groupId)) {
+        if (!groupId || !ObjectId.isValid(groupId)) {
             next(new BadRequestException(
                 ErrorMessages.BAD_REQUEST,
                 { reason: "Post ID not provided or invalid." }

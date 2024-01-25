@@ -34,7 +34,7 @@ export class UserController {
             if (exists) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: "User already exist." }))
             const token: string = await user.generateToken()
             await user.save()
-            console.log(user)
+           // console.log(user)
             res.status(201).send({ user, token })
         } catch (e) {
             console.error(e)

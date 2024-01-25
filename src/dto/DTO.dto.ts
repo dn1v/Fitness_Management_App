@@ -8,19 +8,3 @@ export abstract class AbstractDto {
             true;
     }
 }
-
-
-export class DTO {
-
-    public allowedFields: string[]
-
-    constructor() {
-        this.allowedFields = []
-    }
-
-    public fieldsCheck(fields: string[]) {
-        return this.allowedFields.length > 0 ?
-        fields.every((field: string) => this.allowedFields.includes(field)) :
-        true;
-    }
-}
