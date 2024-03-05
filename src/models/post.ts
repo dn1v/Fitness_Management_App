@@ -4,11 +4,11 @@ import { IExcelMetadata, IPost } from "../interfaces/post.interface";
 const excelFileMetadata: Schema<IExcelMetadata> = new Schema({
     fileName: {
         type: String,
-        required: true,
+        // required: true,
     },
     fileSize: {
         type: Number,
-        required: true,
+        // required: true,
     },
 })
 

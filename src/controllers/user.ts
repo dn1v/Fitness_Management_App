@@ -50,14 +50,24 @@ export class UserController {
                     { reason: 'Email, password or both are missing in the request.' }
                 ))
             }
-            const user = await User.credentialsCheck(req.body.email, req.body.password)
+            const user = await User.credentialsCheck(req.body.email, req.body.password, next)
+            console.log("USER:", user)
             const token = await user.generateToken()
             await user.save()
             res.status(200).send({ user, token })
-        } catch (e) {
-            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+        } catch (error) {
+            console.error(error);
+            if (error instanceof BadRequestException) {
+                next(error);
+            } else if (error instanceof NotFoundException) {
+                next(error);
+            } else {
+                next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR));
+            }
+            // next(e)
         }
     }
+
 
     public async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {

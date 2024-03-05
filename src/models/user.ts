@@ -6,6 +6,7 @@ import { IUser } from "../interfaces/user.interface";
 import { BadRequestException } from "../exceptions/badRequestException";
 import { NotFoundException } from "../exceptions/notFoundException";
 import { ErrorMessages } from "../constants/errorMessages";
+import { NextFunction } from "express";
 
 const userSchema: Schema<IUser> = new Schema({
     firstName: {
@@ -86,13 +87,40 @@ userSchema.methods.generateToken = async function () {
     return token;
 };
 
-userSchema.statics.credentialsCheck = async function (email: string, password: string): Promise<IUser | void> {
-    const user = await User.findOne({ email }).exec()
-    if (!user) throw new NotFoundException(ErrorMessages.USER_404, { reason: email })
-    const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) throw new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: password })
-    return user
+// userSchema.statics.credentialsCheck = async function (email: string, password: string, next: NextFunction): Promise<IUser | void> {
+//     try {
+//         const user = await User.findOne({ email }).exec()
+//         if (!user) throw new NotFoundException(ErrorMessages.USER_404, { reason: email })
+//         const isMatch = await bcrypt.compare(password, user.password)
+//         if (!isMatch) throw new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: password })
+//         // if (!isMatch) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: password })) 
+//         return user  
+//     } catch (e) {
+//         console.error(e)
+//     }
+
+// }
+
+    
+userSchema.statics.credentialsCheck = async function (email: string, password: string): Promise<IUser> {
+    try {
+        const user = await User.findOne({ email }).exec();
+        if (!user) {
+            throw new NotFoundException(ErrorMessages.USER_404, { reason: email });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            throw new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: password });
+        }
+
+        return user;
+    } catch (error) {
+        throw error;  // Re-throw the error so that it propagates up to the calling function
+    }
 }
+
 
 userSchema.pre('save', async function (next) {
     if (this.isModified("password")) {

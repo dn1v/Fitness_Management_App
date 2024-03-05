@@ -83,10 +83,12 @@ export class PostController {
                 { _id: { $in: groupsToUpdate } },
                 { $addToSet: { posts: post._id } }
             )
+            let groups = [...new Set([...post.groups, ...groupsToUpdate])]
+            post.groups = groups
             await post.save()
             res.status(201).send({ post })
         } catch (e) {
-            console.error(e)
+            console.error("IS IT HERE?", e)
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }

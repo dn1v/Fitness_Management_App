@@ -12,7 +12,7 @@ export class Validation {
         skipMissingProperties = false
     ): RequestHandler {
         return async (req: Request, res: Response, next: NextFunction) => {
-            //console.log('REQUEST:', req)
+            console.log('REQUEST:', req.body)
             try {
                 if (!req.body) {
                     return next(new BadRequestException(ErrorMessages.BAD_REQUEST));
@@ -28,7 +28,7 @@ export class Validation {
                     skipMissingProperties,
                     forbidUnknownValues: true,
                 });
-
+                
                 if (errors.length > 0) {
                     const reason = errors.map((error: ValidationError) => Object.values(error.constraints || '')).join(', ');
                     return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason }));
