@@ -35,10 +35,16 @@ export class GroupController {
     }
 
     public async readGroups(req: Request, res: Response, next: NextFunction): Promise<void> {
-        const { _id: admin } = req.user
-        console.log(admin)
+        const { _id } = req.user
+        console.log(_id)
         try {
-            const groups = await Group.find({ admin })
+            // const groups = await Group.find({ admin })
+            const groups = await Group.find({
+                $or: [
+                    { admin: _id },
+                    { moderators: _id }
+                ]
+            })
             res.send({ groups })
         } catch (e) {
             console.error(e)

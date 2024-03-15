@@ -60,6 +60,14 @@ const userSchema: Schema<IUser> = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     }],
+    // groups: [{
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Group'
+    // }],
+    // posts: [{
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'Post'
+    // }],
     tokens: [
         {
             token: {

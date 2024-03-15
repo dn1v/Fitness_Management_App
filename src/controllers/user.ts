@@ -34,7 +34,7 @@ export class UserController {
             if (exists) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: "User already exist." }))
             const token: string = await user.generateToken()
             await user.save()
-           // console.log(user)
+            // console.log(user)
             res.status(201).send({ user, token })
         } catch (e) {
             console.error(e)
@@ -161,8 +161,8 @@ export class UserController {
             const user = await User.findOne({ email })
 
             if (!user) return next(new NotFoundException(ErrorMessages.USER_404, { reason: email }))
-            console.log('SHOULD FIRE UP:', req.user.connections.includes(user._id.toString()))
-            console.log(req.user.connections[0], user._id)
+            // console.log('SHOULD FIRE UP:', req.user.connections.includes(user._id.toString()))
+            // console.log(req.user.connections[0], user._id)
             if (req.user.connections.includes(user._id.toString())) {
                 return next(
                     new BadRequestException(
@@ -223,10 +223,29 @@ export class UserController {
     }
 
 
-    public async getConnectionRequests(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    public async getSentRequests(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            const connectionRequests = await User.find().where('_id').in(req.user.pending).exec()
-            res.send({ requests: connectionRequests })
+            const sentRequests = await User.find()
+                .select('_id firstName lastName __t')
+                .where('_id')
+                .in(req.user.sentReqs)
+                .exec()
+
+            res.send({ requests: sentRequests })
+        } catch (e) {
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
+
+    public async getReceivedRequests(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const receivedRequests = await User.find()
+                .select('_id firstName lastName __t')
+                .where('_id')
+                .in(req.user.receivedReqs)
+                .exec()
+
+            res.send({ requests: receivedRequests })
         } catch (e) {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }

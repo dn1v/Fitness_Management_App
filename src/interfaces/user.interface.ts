@@ -12,6 +12,8 @@ export interface IUser extends Document {
     athletes?: ObjectId[];
     connections?: ObjectId[];
     pending?: ObjectId[];
+    posts?: ObjectId[];
+    groups?: ObjectId[];
     tokens: { token: string }[];
     profilePhoto?: Buffer;
     generateToken(): Promise<string>;

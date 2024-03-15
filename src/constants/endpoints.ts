@@ -7,6 +7,8 @@ export enum Endpoints {
     USERS_LOGOUT = '/users/me/logout',
     USERS_LOGOUTALL = '/users/me/logoutAll',
     USERS_ME_CONNECTIONS = '/users/me/connections',
+    USERS_ME_CONNECTIONS_SENT = '/users/me/connections/sent',
+    USERS_ME_CONNECTIONS_RECEIVED = '/users/me/connections/received',
     USERS_ME_CONNECTIONS_ID = '/users/me/connections/:id',
     USERS_ME_CONNECTIONS_ACCEPT_ID = '/users/me/connections/accept/:id',
     USERS_ME_CONNECTIONS_DECLINE_ID = '/users/me/connections/decline/:id',
