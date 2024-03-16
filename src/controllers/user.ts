@@ -158,11 +158,11 @@ export class UserController {
     public async connectionRequest(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
             const { email } = req.body
+            if (!email) return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'You did not provide email.' }))
             const user = await User.findOne({ email })
 
+
             if (!user) return next(new NotFoundException(ErrorMessages.USER_404, { reason: email }))
-            // console.log('SHOULD FIRE UP:', req.user.connections.includes(user._id.toString()))
-            // console.log(req.user.connections[0], user._id)
             if (req.user.connections.includes(user._id.toString())) {
                 return next(
                     new BadRequestException(
@@ -170,8 +170,10 @@ export class UserController {
                         { reason: "Already connected with the user." }
                     ))
             }
-            user.receivedReqs.push(req.user._id)
-            req.user.sentReqs.push(user._id)
+            if (!req.user.sentReqs.includes(user._id.toString())) {
+                user.receivedReqs.push(req.user._id)
+                req.user.sentReqs.push(user._id)
+            }
             await Promise.all([user.save(), req.user.save()])
             res.status(201).send({ message: "Request sent." })
         } catch (e) {
