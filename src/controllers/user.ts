@@ -170,10 +170,18 @@ export class UserController {
                         { reason: "Already connected with the user." }
                     ))
             }
-            if (!req.user.sentReqs.includes(user._id.toString())) {
-                user.receivedReqs.push(req.user._id)
-                req.user.sentReqs.push(user._id)
+
+            if (
+                req.user.sentReqs.includes(user._id.toString()) ||
+                req.user.receivedReqs.includes(user._id.toString())
+            ) {
+                return next(new BadRequestException(
+                    ErrorMessages.BAD_REQUEST,
+                    { reason: 'You have already sent a request to this user, or they have already sent one to you.' }
+                ))
             }
+            user.receivedReqs.push(req.user._id)
+            req.user.sentReqs.push(user._id)
             await Promise.all([user.save(), req.user.save()])
             res.status(201).send({ message: "Request sent." })
         } catch (e) {
@@ -182,8 +190,28 @@ export class UserController {
         }
     }
 
-    public async removeConnectionRequst(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
-
+    public async removeConnectionRequest(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+        try {
+            const _id = req.body.id
+            // dto validation instead
+            if (!_id) {
+                return next(new BadRequestException(
+                    ErrorMessages.BAD_REQUEST,
+                    { reason: 'User ID is not provided.' }
+                ))
+            }
+            const user = await User.findOne({ _id })
+            if (!user) return next(new NotFoundException(ErrorMessages.USER_404, { reason: _id }))
+            if (!req.user.sentReqs.includes(user._id.toString())) {
+                return next(new NotFoundException(ErrorMessages.USER_404, { reason: 'User is not on your request list.' }))
+            }
+            req.user.sentReqs.filter((id: ObjectId) => id.toString() !== user._id.toString())
+            user.receivedReqs.filter((id: ObjectId) => id.toString() !== req.user._id.toString())
+            await req.user.save()
+            await user.save()
+        } catch (e) {
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+        }
     }
 
     public async acceptConnectionRequest(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
