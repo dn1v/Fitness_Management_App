@@ -27,6 +27,7 @@ export class GroupController {
         const group = new Group({ ...req.body, admin: req.user._id })
         try {
             await group.save()
+            console.log(group)
             res.status(201).send({ group })
         } catch (e) {
             console.error(e)

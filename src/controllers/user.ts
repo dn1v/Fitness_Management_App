@@ -190,9 +190,24 @@ export class UserController {
         }
     }
 
+    public async readUserConnections(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+        try {
+            const users = await User.find()
+                .select('_id firstName lastName __t')
+                .where('_id')
+                .in(req.user.connections)
+                .exec()
+            res.send({ users })
+        } catch (e) {
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+            
+        }
+    }
+
     public async removeConnectionRequest(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            const _id = req.body.id
+            const _id = req.params.id
+            console.log(_id)
             // dto validation instead
             if (!_id) {
                 return next(new BadRequestException(
@@ -201,14 +216,17 @@ export class UserController {
                 ))
             }
             const user = await User.findOne({ _id })
+            console.log(user)
             if (!user) return next(new NotFoundException(ErrorMessages.USER_404, { reason: _id }))
             if (!req.user.sentReqs.includes(user._id.toString())) {
                 return next(new NotFoundException(ErrorMessages.USER_404, { reason: 'User is not on your request list.' }))
             }
-            req.user.sentReqs.filter((id: ObjectId) => id.toString() !== user._id.toString())
-            user.receivedReqs.filter((id: ObjectId) => id.toString() !== req.user._id.toString())
+            req.user.sentReqs = req.user.sentReqs.filter((id: ObjectId) => id.toString() !== user._id.toString())
+            user.receivedReqs = user.receivedReqs.filter((id: ObjectId) => id.toString() !== req.user._id.toString())
+            console.log(req.user.sentReqs, user.receivedReqs)
             await req.user.save()
             await user.save()
+            res.send({ message: 'Connection request withdrawn.' })
         } catch (e) {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
@@ -261,7 +279,7 @@ export class UserController {
                 .in(req.user.sentReqs)
                 .exec()
 
-            res.send({ requests: sentRequests })
+            res.send({ users: sentRequests })
         } catch (e) {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
@@ -275,7 +293,7 @@ export class UserController {
                 .in(req.user.receivedReqs)
                 .exec()
 
-            res.send({ requests: receivedRequests })
+            res.send({ users: receivedRequests })
         } catch (e) {
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }

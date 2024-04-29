@@ -54,5 +54,10 @@ export class PostRouter extends AppRouter {
                 Auth.authenticate,
                 this.controller.deletePost
             )
+            .get(
+                Endpoints.POSTS_GENERAL_ID,
+                Auth.authenticate,
+                this.controller.readUserGeneralPost
+            )
     }
 }

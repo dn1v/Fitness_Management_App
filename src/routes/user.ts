@@ -27,12 +27,13 @@ export class UserRouter extends AppRouter {
 
             // Athlete Connections
             .post(Endpoints.USERS_ME_CONNECTIONS, Auth.authenticate, this.controller.connectionRequest)
-            .post(Endpoints.USERS_ME_CONNECTIONS_DECLINE_ID, Auth.authenticate, this.controller.declineConnectionRequest)
-            .post(Endpoints.USERS_ME_CONNECTIONS_REMOVE_ID, Auth.authenticate, this.controller.removeUserConnection)
-            .post(Endpoints.USERS_ME_CONNECTIONS_ID, Auth.authenticate, this.controller.removeConnectionRequest)
             .post(Endpoints.USERS_ME_CONNECTIONS_ACCEPT_ID, Auth.authenticate, this.controller.acceptConnectionRequest)
+            .delete(Endpoints.USERS_ME_CONNECTIONS_DECLINE_ID, Auth.authenticate, this.controller.declineConnectionRequest)
+            .delete(Endpoints.USERS_ME_CONNECTIONS_REMOVE_ID, Auth.authenticate, this.controller.removeUserConnection)
+            .delete(Endpoints.USERS_ME_CONNECTIONS_ID, Auth.authenticate, this.controller.removeConnectionRequest)
             .get(Endpoints.USERS_ME_CONNECTIONS_SENT, Auth.authenticate, this.controller.getSentRequests)
             .get(Endpoints.USERS_ME_CONNECTIONS_RECEIVED, Auth.authenticate, this.controller.getReceivedRequests)
+            .get(Endpoints.USERS_ME_CONNECTIONS, Auth.authenticate, this.controller.readUserConnections)
 
             // Athlete Profile Picture Management
             .post(Endpoints.USERS_ME_PROFILEPIC, Auth.authenticate, this.controller.uploadPhoto)

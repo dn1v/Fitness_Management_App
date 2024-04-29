@@ -106,6 +106,36 @@ export class PostController {
         }
     }
 
+    public async readUserGeneralPost(req: Request, res: Response, next: NextFunction): Promise<void> {
+        const _id = req.params.id
+        try {
+            if (!_id) {
+                return next(new BadRequestException(
+                    ErrorMessages.BAD_REQUEST,
+                    { reason: "ID not provided." }
+                ))
+            }
+            const user = await User.findOne({ _id })
+            if (!user) {
+                return next(new NotFoundException(ErrorMessages.USER_404))
+            }
+            if (!req.user.connections.includes(user._id)) {
+                return next(new ForbiddenException(
+                    ErrorMessages.FORBIDDEN,
+                    { reason: "User not on your connection list." }
+                ))
+            }
+            const posts = await Post.find({
+                authorId: _id,
+                isGeneral: true
+            })
+            res.send({ posts })
+            console.log('this is what im looking =>', posts)
+        } catch (e) {
+            next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
+        }
+    }
+
     public async readGroupPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
         const { groupId } = req.params
         if (this.noGroupId(groupId, next)) return
