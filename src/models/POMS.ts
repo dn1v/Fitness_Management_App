@@ -15,7 +15,8 @@ const moodStatePoperties = {
 const pomsSchema: Schema<IPOMS> = new Schema({
     owner: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'User'
     },
     angry: props,
     annoyed: props,

@@ -1,7 +1,9 @@
 import { Router } from "express";
 
 export abstract class AppRouter {
-    router: Router
+    
+    protected router: Router
+
     constructor() {
         this.router = Router()
     }

@@ -7,7 +7,6 @@ import { NotFoundException } from "../exceptions/notFoundException";
 import { ForbiddenException } from "../exceptions/forbiddenException";
 import { User } from "../models/user";
 import { Post } from "../models/post";
-import { Roles } from "../constants/roles";
 import { ObjectId } from 'mongodb'
 import ExcelJS from 'exceljs'
 

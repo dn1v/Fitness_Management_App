@@ -4,15 +4,14 @@ import { Database } from './db/mongoose'
 import { HttpException } from './exceptions/httpExceptions'
 import { ErrorMessages } from './constants/errorMessages'
 import http, { Server } from 'http'
-import { Server as SocketIOServer } from 'socket.io'
 import { AppRouter } from './routes/appRouter'
 import bodyParser from 'body-parser'
 import fileUpload from 'express-fileupload'
 
 export class App {
+    
     private app: Express
     private server: Server
-    private io: SocketIOServer
     private port: string | undefined
     private routers: AppRouter[]
 
@@ -22,7 +21,6 @@ export class App {
         this.enviromentVariables()
         this.port = process.env.PORT
         this.server = http.createServer(this.app)
-        this.io = new SocketIOServer(this.server)
         this.init()
     }
 
@@ -36,7 +34,6 @@ export class App {
         this.server.listen(this.port, () => {
             console.log('Server is up on port', this.port)
         })
-        //this.io.listen()
     }
 
     private enviromentVariables(): void {

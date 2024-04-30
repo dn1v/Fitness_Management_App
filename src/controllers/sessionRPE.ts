@@ -6,6 +6,8 @@ import { BadRequestException } from "../exceptions/badRequestException";
 import { ErrorMessages } from "../constants/errorMessages";
 import { HttpException } from "../exceptions/httpExceptions";
 import { NotFoundException } from "../exceptions/notFoundException";
+import { isEqualsGreaterThanToken } from "typescript";
+import { ISessionRPE } from "../interfaces/sRPE.interface";
 
 export class SessionRPEController {
 
@@ -43,13 +45,15 @@ export class SessionRPEController {
 
     public async readSessionRPEs(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            await req.athlete.populate({
-                path: 'sRPE',
-                match: req.match,
-                options: req.options
-            })
-            res.send(req.athlete.sRPE)
+
+            const match = req.match || {}
+            match.owner = req.user._id
+            console.log(match)
+            let sessionRPE = await SessionRPE.find(match, null, req.options);
+            console.log(sessionRPE.sRPE)
+            res.send(sessionRPE)
         } catch (e) {
+            console.error(e)
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }
@@ -77,7 +81,7 @@ export class SessionRPEController {
             })
             res.send(athlete.sRPE)
         } catch (e) {
-            console.error(e)
+            console.error('LOOK HERE => ', e)
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))
         }
     }

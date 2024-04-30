@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsNumber, IsOptional, Min, Max } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, Min, Max, IsString } from "class-validator";
 import { AbstractDto } from "../DTO.dto";
 
 export class CreateSRPEDto extends AbstractDto {
 
-    @IsNumber()
+    @IsString()
     @IsOptional()
     trainingType: string;
 
