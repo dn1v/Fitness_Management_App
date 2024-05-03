@@ -7,11 +7,11 @@ export class Utils {
         const rangeOperator = req.query.rangeOperator;
 
         if (req.query.dateFrom) {
-            match['createdAt'] = { '$gte': new Date(req.query.dateFrom as string) };
+            match['createdAt']['$gte'] = new Date(req.query.dateFrom as string);
         }
 
         if (req.query.dateTo) {
-            match['createdAt'] = { ...match['createdAt'], '$lte': new Date(req.query.dateTo as string) };
+            match['createdAt']['$lte'] = new Date(req.query.dateTo as string);
         }
 
         if (['lte', 'gte'].includes(rangeOperator as string)) {
@@ -29,7 +29,6 @@ export class Utils {
     static paginationAndSorting(req: Request, res: Response, next: NextFunction): void {
 
         const limit: number = parseInt(req.query.limit as string);
-        // const limit: string = req.query.limit as string;
         const skip: number = parseInt(req.query.skip as string) * limit
 
         let sort: { [key: string]: string } = {};
