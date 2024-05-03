@@ -6,8 +6,7 @@ import { BadRequestException } from "../exceptions/badRequestException";
 import { ErrorMessages } from "../constants/errorMessages";
 import { HttpException } from "../exceptions/httpExceptions";
 import { NotFoundException } from "../exceptions/notFoundException";
-import { isEqualsGreaterThanToken } from "typescript";
-import { ISessionRPE } from "../interfaces/sRPE.interface";
+
 
 export class SessionRPEController {
 
@@ -48,7 +47,6 @@ export class SessionRPEController {
 
             const match = req.match || {}
             match.owner = req.user._id
-            console.log(match)
             let sessionRPE = await SessionRPE.find(match, null, req.options);
             console.log(sessionRPE.sRPE)
             res.send(sessionRPE)
@@ -74,12 +72,10 @@ export class SessionRPEController {
                     { reason: "User is not on your coaching list." }
                 ))
             }
-            await athlete.populate({
-                path: 'sRPE',
-                match: req.match,
-                options: req.options
-            })
-            res.send(athlete.sRPE)
+            const match = req.match || {}
+            match.owner = req.user._id
+            let sessionRPE = await SessionRPE.find(match, null, req.options);
+            res.send(sessionRPE)
         } catch (e) {
             console.error('LOOK HERE => ', e)
             next(new HttpException(500, ErrorMessages.INTERNAL_SERVER_ERROR))

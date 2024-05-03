@@ -28,13 +28,14 @@ export class Utils {
 
     static paginationAndSorting(req: Request, res: Response, next: NextFunction): void {
 
-        const limit: string = req.query.limit as string;
-        const skip: number = parseInt(req.query.skip as string) * parseInt(limit);
+        const limit: number = parseInt(req.query.limit as string);
+        // const limit: string = req.query.limit as string;
+        const skip: number = parseInt(req.query.skip as string) * limit
 
         let sort: { [key: string]: string } = {};
 
         if (typeof req.query.sortBy === 'string') {
-            (req.query.sortBy as string).split('&').map(keyValue => {
+            (req.query.sortBy).split('&').map(keyValue => {
                 const arr: string[] = keyValue.split(':');
                 sort[arr[0]] = arr[1];
             });
