@@ -61,9 +61,6 @@ Once the application is running, you can access it by navigating to http://local
 ## TODO
 
 -   **Quality Assurance Testing (Automated):** Ensure comprehensive testing through both manual and automated processes to maintain product quality.
--   **Real-time Chat Integration:** Integrate real-time chat functionality to enhance user interactions and engagement.
--   **Coach Posts Implementation:** Implement a feature allowing coaches to create and share posts for athlete engagement and guidance.
--   **Training Group Management:** Create functionality to efficiently manage and organize training groups for better coordination and communication.
 
 ## Contributing
 

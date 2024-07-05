@@ -18,7 +18,6 @@ export class Utils {
             const fieldArr = field.split('-')
             const operator = fieldArr[0]
             const key = fieldArr[1]
-            // (field.includes('gte') || field.includes('lte')) 
             if (operator && fields.includes(field.slice(4))) {
                 return next(new BadRequestException(ErrorMessages.BAD_REQUEST, { reason: 'Range operator error.'}))
             }
